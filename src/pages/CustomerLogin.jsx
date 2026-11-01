@@ -1,0 +1,163 @@
+import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import { useCustomerAuth } from '../context/CustomerAuthContext'
+import toast from 'react-hot-toast'
+import { Leaf, Loader2, Eye, EyeOff } from 'lucide-react'
+
+// Field component defined OUTSIDE to avoid focus-loss bug
+function Field({ label, name, type, placeholder, value, onChange, error, rightElement }) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <div className="relative">
+        <input
+          type={type || 'text'}
+          name={name}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          className={`w-full border rounded-xl px-3 py-2.5 text-sm bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition pr-10 ${error ? 'border-red-400' : 'border-gray-300'}`}
+        />
+        {rightElement && <div className="absolute right-3 top-1/2 -translate-y-1/2">{rightElement}</div>}
+      </div>
+      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+    </div>
+  )
+}
+
+export default function CustomerLogin() {
+  const { signIn, signUp, customer } = useCustomerAuth()
+  const navigate = useNavigate()
+  const [tab, setTab] = useState('login') // 'login' | 'signup'
+  const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [form, setForm] = useState({ fullName: '', email: '', password: '', confirmPassword: '' })
+  const [errors, setErrors] = useState({})
+
+  // Redirect if already logged in
+  if (customer) {
+    navigate('/my-orders')
+    return null
+  }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setForm(prev => ({ ...prev, [name]: value }))
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }))
+  }
+
+  const validateLogin = () => {
+    const e = {}
+    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Valid email required'
+    if (!form.password || form.password.length < 6) e.password = 'Password must be at least 6 characters'
+    return e
+  }
+
+  const validateSignup = () => {
+    const e = {}
+    if (!form.fullName.trim()) e.fullName = 'Full name is required'
+    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Valid email required'
+    if (!form.password || form.password.length < 6) e.password = 'Password must be at least 6 characters'
+    if (form.password !== form.confirmPassword) e.confirmPassword = 'Passwords do not match'
+    return e
+  }
+
+  const handleLogin = async (e) => {
+    e.preventDefault()
+    const errs = validateLogin()
+    if (Object.keys(errs).length) { setErrors(errs); return }
+    setLoading(true)
+    try {
+      await signIn(form.email, form.password)
+      toast.success('Welcome back! 🌿')
+      navigate('/my-orders')
+    } catch (err) {
+      toast.error(err.message || 'Login failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSignup = async (e) => {
+    e.preventDefault()
+    const errs = validateSignup()
+    if (Object.keys(errs).length) { setErrors(errs); return }
+    setLoading(true)
+    try {
+      await signUp(form.email, form.password, form.fullName)
+      toast.success('Account created! Please check your email to confirm, then login.')
+      setTab('login')
+    } catch (err) {
+      toast.error(err.message || 'Signup failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const eyeBtn = (
+    <button type="button" onClick={() => setShowPassword(p => !p)} className="text-gray-400 hover:text-gray-600">
+      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+    </button>
+  )
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-6">
+          <Link to="/" className="inline-flex items-center gap-2 text-green-700 font-bold text-xl mb-4">
+            <Leaf className="w-6 h-6" />
+            GreenBasket
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-800">
+            {tab === 'login' ? 'Welcome Back!' : 'Create Account'}
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            {tab === 'login' ? 'Login to track your orders' : 'Join GreenBasket today'}
+          </p>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
+          {['login', 'signup'].map(t => (
+            <button
+              key={t}
+              onClick={() => { setTab(t); setErrors({}) }}
+              className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${tab === t ? 'bg-white text-green-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              {t === 'login' ? 'Login' : 'Sign Up'}
+            </button>
+          ))}
+        </div>
+
+        {/* Login Form */}
+        {tab === 'login' && (
+          <form onSubmit={handleLogin} className="space-y-4">
+            <Field label="Email Address" name="email" type="email" placeholder="you@example.com" value={form.email} onChange={handleChange} error={errors.email} />
+            <Field label="Password" name="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={form.password} onChange={handleChange} error={errors.password} rightElement={eyeBtn} />
+            <button type="submit" disabled={loading} className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+              {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Logging in...</> : 'Login'}
+            </button>
+          </form>
+        )}
+
+        {/* Signup Form */}
+        {tab === 'signup' && (
+          <form onSubmit={handleSignup} className="space-y-4">
+            <Field label="Full Name" name="fullName" placeholder="Ramesh Kumar" value={form.fullName} onChange={handleChange} error={errors.fullName} />
+            <Field label="Email Address" name="email" type="email" placeholder="you@example.com" value={form.email} onChange={handleChange} error={errors.email} />
+            <Field label="Password" name="password" type={showPassword ? 'text' : 'password'} placeholder="Min 6 characters" value={form.password} onChange={handleChange} error={errors.password} rightElement={eyeBtn} />
+            <Field label="Confirm Password" name="confirmPassword" type={showPassword ? 'text' : 'password'} placeholder="Repeat password" value={form.confirmPassword} onChange={handleChange} error={errors.confirmPassword} />
+            <button type="submit" disabled={loading} className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+              {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating account...</> : 'Create Account'}
+            </button>
+          </form>
+        )}
+
+        <p className="text-center text-xs text-gray-400 mt-6">
+          <Link to="/" className="text-green-600 hover:underline">← Back to Shop</Link>
+        </p>
+      </div>
+    </div>
+  )
+}
