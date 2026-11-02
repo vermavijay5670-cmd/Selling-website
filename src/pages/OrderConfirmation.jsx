@@ -13,7 +13,8 @@ export default function OrderConfirmation() {
     )
   }
 
-  const { orderId, customerName, phone, total, items } = state
+  const { orderId, customerName, phone, total, items, loggedIn } = state
+  const shortId = String(orderId).slice(0, 8).toUpperCase()
 
   return (
     <div className="max-w-xl mx-auto px-4 sm:px-6 py-12">
@@ -27,7 +28,7 @@ export default function OrderConfirmation() {
         <div className="bg-green-50 rounded-xl p-4 mb-6 text-left space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Order ID</span>
-            <span className="font-mono font-semibold text-gray-700 text-xs break-all">{orderId}</span>
+            <span className="font-mono font-semibold text-gray-700 text-xs break-all">#{shortId}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Phone</span>
@@ -56,6 +57,15 @@ export default function OrderConfirmation() {
           </div>
         </div>
 
+        <Link
+          to={loggedIn ? '/my-orders' : `/track?id=${shortId}`}
+          className="w-full inline-block border-2 border-green-600 text-green-700 hover:bg-green-50 font-semibold py-3 rounded-xl transition-colors mb-3"
+        >
+          Track This Order 🚚
+        </Link>
+        {!loggedIn && (
+          <p className="text-xs text-gray-400 mb-3">Save your Order ID <span className="font-mono">#{shortId}</span> and phone number to track later.</p>
+        )}
         <Link
           to="/products"
           className="w-full inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition-colors"

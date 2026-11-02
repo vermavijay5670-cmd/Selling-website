@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
-import { supabase } from '../lib/supabase'
+import { useCustomerAuth } from '../context/CustomerAuthContext'
+import { supabase, supabaseConfigured } from '../lib/supabase'
 import { sendTelegramNotification, formatOrderMessage } from '../lib/telegram'
 import toast from 'react-hot-toast'
 import { ShoppingBag, Loader2 } from 'lucide-react'
@@ -45,10 +46,21 @@ function Field({ label, name, type, required, placeholder, as, value, onChange, 
 
 export default function Checkout() {
   const { cart, cartTotal, clearCart } = useCart()
+  const { customer } = useCustomerAuth()
   const navigate = useNavigate()
   const [form, setForm] = useState(INITIAL_FORM)
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
+
+  // Prefill name/email for logged-in customers
+  useEffect(() => {
+    if (!customer) return
+    setForm(prev => ({
+      ...prev,
+      fullName: prev.fullName || customer.user_metadata?.full_name || '',
+      email: prev.email || customer.email || '',
+    }))
+  }, [customer])
 
   if (cart.length === 0) {
     return (
@@ -91,7 +103,12 @@ export default function Checkout() {
 
     setLoading(true)
     try {
+      // Generate the id here: guests can't SELECT the row back under RLS,
+      // so insert(...).select() would fail for them.
+      const orderId = crypto.randomUUID()
       const orderData = {
+        id: orderId,
+        user_id: customer?.id ?? null,
         customer_name: form.fullName,
         email: form.email,
         phone: form.phone,
@@ -106,13 +123,13 @@ export default function Checkout() {
         payment_method: 'cod',
       }
 
-      const { data, error } = await supabase.from('orders').insert([orderData]).select().single()
+      const { error } = await supabase.from('orders').insert([orderData])
 
-      if (error) {
-        console.warn('Supabase error (using local ID):', error.message)
+      if (error && supabaseConfigured) {
+        console.error('Order save failed:', error)
+        toast.error('Could not place your order. Please try again.')
+        return
       }
-
-      const orderId = data?.id || `ORD-${Date.now()}`
 
       await sendTelegramNotification(formatOrderMessage({
         id: orderId,
@@ -127,7 +144,7 @@ export default function Checkout() {
       clearCart()
       toast.success('Order placed successfully!')
       navigate('/order-confirmation', {
-        state: { orderId, customerName: form.fullName, phone: form.phone, total: cartTotal, items: cart }
+        state: { orderId, customerName: form.fullName, phone: form.phone, total: cartTotal, items: cart, loggedIn: !!customer }
       })
     } catch (err) {
       console.error(err)
@@ -154,6 +171,11 @@ export default function Checkout() {
         <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-4">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <h2 className="font-semibold text-gray-800 mb-4 text-lg">Delivery Details</h2>
+            {!customer && (
+              <p className="text-xs text-gray-500 bg-green-50 border border-green-100 rounded-lg px-3 py-2 mb-4">
+                <Link to="/login" state={{ from: '/checkout' }} className="text-green-700 font-semibold hover:underline">Log in</Link> to save this order to your account and track it anytime. Or continue as guest.
+              </p>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label="Full Name" required placeholder="Ramesh Kumar" {...fieldProps('fullName')} />
               <Field label="Email Address" type="email" required placeholder="ramesh@example.com" {...fieldProps('email')} />

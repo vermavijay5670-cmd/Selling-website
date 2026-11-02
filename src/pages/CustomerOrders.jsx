@@ -2,52 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCustomerAuth } from '../context/CustomerAuthContext'
 import { supabase } from '../lib/supabase'
+import OrderTimeline, { STATUS_INFO } from '../components/OrderTimeline'
 import { Leaf, Package, LogOut, ShoppingBag, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
-
-const STATUS_STEPS = ['pending', 'confirmed', 'dispatched', 'delivered']
-
-const STATUS_INFO = {
-  pending:    { label: 'Order Placed',     icon: '📋', color: 'text-yellow-600', bg: 'bg-yellow-50 border-yellow-200' },
-  confirmed:  { label: 'Confirmed',        icon: '✅', color: 'text-blue-600',   bg: 'bg-blue-50 border-blue-200' },
-  dispatched: { label: 'Out for Delivery', icon: '🚚', color: 'text-purple-600', bg: 'bg-purple-50 border-purple-200' },
-  delivered:  { label: 'Delivered',        icon: '🎉', color: 'text-green-600',  bg: 'bg-green-50 border-green-200' },
-  cancelled:  { label: 'Cancelled',        icon: '❌', color: 'text-red-600',    bg: 'bg-red-50 border-red-200' },
-}
-
-function StatusTracker({ status }) {
-  if (status === 'cancelled') {
-    return (
-      <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-        <span className="text-xl">❌</span>
-        <span className="text-red-600 font-semibold text-sm">Order Cancelled</span>
-      </div>
-    )
-  }
-  const currentIdx = STATUS_STEPS.indexOf(status)
-  return (
-    <div className="flex items-center gap-1 overflow-x-auto py-2">
-      {STATUS_STEPS.map((step, idx) => {
-        const done = idx <= currentIdx
-        const active = idx === currentIdx
-        return (
-          <div key={step} className="flex items-center gap-1 flex-shrink-0">
-            <div className="flex flex-col items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all ${done ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-gray-300 text-gray-400'} ${active ? 'ring-2 ring-green-300 ring-offset-1' : ''}`}>
-                {done ? '✓' : idx + 1}
-              </div>
-              <span className={`text-xs mt-1 font-medium ${done ? 'text-green-700' : 'text-gray-400'} whitespace-nowrap`}>
-                {STATUS_INFO[step]?.label}
-              </span>
-            </div>
-            {idx < STATUS_STEPS.length - 1 && (
-              <div className={`w-8 h-0.5 mb-4 flex-shrink-0 rounded ${done && idx < currentIdx ? 'bg-green-500' : 'bg-gray-200'}`} />
-            )}
-          </div>
-        )
-      })}
-    </div>
-  )
-}
 
 export default function CustomerOrders() {
   const { customer, signOut, customerLoading } = useCustomerAuth()
@@ -62,7 +18,17 @@ export default function CustomerOrders() {
   }, [customer, customerLoading, navigate])
 
   useEffect(() => {
-    if (customer) fetchOrders()
+    if (!customer) return
+    fetchOrders()
+    // live status updates when the shop changes an order
+    const channel = supabase
+      .channel(`orders-${customer.id}`)
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${customer.id}` },
+        () => fetchOrders(true))
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customer])
 
   const fetchOrders = async (isRefresh = false) => {
@@ -71,7 +37,7 @@ export default function CustomerOrders() {
     try {
       const { data, error } = await supabase
         .from('orders')
-        .select('*')
+        .select('*, order_status_history(status, created_at)')
         .eq('user_id', customer.id)
         .order('created_at', { ascending: false })
       if (error) throw error
@@ -216,7 +182,11 @@ export default function CustomerOrders() {
                       {/* Status Tracker */}
                       <div className="px-5 py-4 border-b border-gray-100 bg-white">
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Order Status</p>
-                        <StatusTracker status={order.status} />
+                        <OrderTimeline
+                          status={order.status}
+                          history={(order.order_status_history || []).map(h => ({ status: h.status, at: h.created_at }))
+                            .sort((a, b) => new Date(a.at) - new Date(b.at))}
+                        />
                       </div>
 
                       <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-5">

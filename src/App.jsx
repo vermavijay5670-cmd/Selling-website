@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { CartProvider } from './context/CartContext'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { CustomerAuthProvider } from './context/CustomerAuthContext'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import CartSidebar from './components/CartSidebar'
@@ -11,6 +12,9 @@ import ProductDetail from './pages/ProductDetail'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import OrderConfirmation from './pages/OrderConfirmation'
+import CustomerLogin from './pages/CustomerLogin'
+import CustomerOrders from './pages/CustomerOrders'
+import TrackOrder from './pages/TrackOrder'
 import AdminLogin from './pages/Admin/AdminLogin'
 import AdminDashboard from './pages/Admin/AdminDashboard'
 import AdminProducts from './pages/Admin/AdminProducts'
@@ -26,11 +30,12 @@ function ProtectedRoute({ children }) {
 function AppLayout() {
   const location = useLocation()
   const isAdmin = location.pathname.startsWith('/admin')
+  const isStandalone = isAdmin || location.pathname === '/login' || location.pathname === '/my-orders'
   const [globalSearch, setGlobalSearch] = useState('')
 
   return (
     <>
-      {!isAdmin && <Navbar onSearch={setGlobalSearch} />}
+      {!isStandalone && <Navbar onSearch={setGlobalSearch} />}
       <CartSidebar />
       <main className="min-h-screen bg-gray-50">
         <Routes>
@@ -40,13 +45,16 @@ function AppLayout() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
+          <Route path="/login" element={<CustomerLogin />} />
+          <Route path="/my-orders" element={<CustomerOrders />} />
+          <Route path="/track" element={<TrackOrder />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/products" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
           <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
         </Routes>
       </main>
-      {!isAdmin && <Footer />}
+      {!isStandalone && <Footer />}
     </>
   )
 }
@@ -54,6 +62,7 @@ function AppLayout() {
 export default function App() {
   return (
     <AuthProvider>
+      <CustomerAuthProvider>
       <CartProvider>
         <Toaster
           position="top-right"
@@ -64,6 +73,7 @@ export default function App() {
         />
         <AppLayout />
       </CartProvider>
+      </CustomerAuthProvider>
     </AuthProvider>
   )
 }

@@ -21,10 +21,10 @@ export function CustomerAuthProvider({ children }) {
   const signUp = async (email, password, fullName) => {
     const { data, error } = await supabase.auth.signUp({
       email, password,
-      options: { data: { full_name: fullName } }
+      options: { data: { full_name: fullName } },
     })
     if (error) throw error
-    return data
+    return data // data.session is null when email confirmation is required
   }
 
   const signIn = async (email, password) => {

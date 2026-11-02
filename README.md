@@ -14,3 +14,17 @@ The React Compiler is not enabled on this template because of its impact on dev 
 ## Expanding the Oxlint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+
+---
+
+## Customer accounts & order tracking
+
+Routes: `/login` (login/signup), `/my-orders` (history + live status timeline), `/track` (guest tracking by Order ID + phone).
+
+### Setup (once)
+1. Supabase SQL Editor: run `supabase-schema.sql`, then `supabase-migration-customer-auth.sql`.
+2. Create your admin user in Supabase -> Authentication -> Users, then run:
+   `INSERT INTO admins (user_id) SELECT id FROM auth.users WHERE email = 'YOUR_ADMIN_EMAIL';`
+   Only users in the `admins` table can open `/admin/*`; ordinary customers cannot.
+3. Copy `.env.example` to `.env` and fill in your keys.
+4. (Optional) Authentication -> Providers -> Email: turn off "Confirm email" if you want instant signup login.

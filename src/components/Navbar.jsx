@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
-import { ShoppingCart, Menu, X, Leaf, User } from 'lucide-react'
+import { ShoppingCart, Menu, X, Leaf, User, PackageSearch } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useCustomerAuth } from '../context/CustomerAuthContext'
 import SearchBar from './SearchBar'
@@ -62,6 +62,22 @@ export default function Navbar({ onSearch }) {
               )}
             </button>
 
+            {/* Track / Account */}
+            <Link
+              to="/track"
+              className="hidden sm:flex items-center gap-1 text-sm text-green-100 hover:text-white transition-colors"
+            >
+              <PackageSearch className="w-4 h-4" />
+              Track
+            </Link>
+            <Link
+              to={customer ? '/my-orders' : '/login'}
+              className="flex items-center gap-1 bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-full transition-colors text-sm font-medium"
+            >
+              <User className="w-4 h-4" />
+              <span className="hidden sm:inline">{customer ? 'My Orders' : 'Login'}</span>
+            </Link>
+
             {/* Admin Link */}
             <Link
               to="/admin"
@@ -97,6 +113,13 @@ export default function Navbar({ onSearch }) {
                 {link.label}
               </NavLink>
             ))}
+            <Link
+              to="/track"
+              className="block text-sm font-medium text-green-100 hover:text-white px-2 py-1"
+              onClick={() => setMobileOpen(false)}
+            >
+              Track Order
+            </Link>
             <Link
               to="/admin"
               className="block text-xs text-green-200 hover:text-white px-2 py-1"

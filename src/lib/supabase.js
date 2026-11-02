@@ -56,6 +56,7 @@ function createMockClient() {
     getSession: async () => ({ data: { session: null }, error: null }),
     onAuthStateChange: (_event, _cb) => ({ data: { subscription: { unsubscribe: () => {} } } }),
     signInWithPassword: async () => ({ data: null, error: { message: 'Supabase not configured yet. Please add your credentials.' } }),
+    signUp: async () => ({ data: null, error: { message: 'Supabase not configured yet. Please add your credentials.' } }),
     signOut: noOp,
   }
 
@@ -65,15 +66,21 @@ function createMockClient() {
     update: () => mockQueryBuilder,
     delete: () => mockQueryBuilder,
     eq: () => mockQueryBuilder,
+    maybeSingle: async () => ({ data: null, error: null }),
     order: () => mockQueryBuilder,
     limit: () => mockQueryBuilder,
     single: async () => ({ data: null, error: null }),
     then: (resolve) => resolve({ data: [], error: null }),
   }
 
+  const mockChannel = { on: () => mockChannel, subscribe: () => mockChannel }
+
   return {
     auth: mockAuth,
     from: (_table) => mockQueryBuilder,
+    rpc: async () => ({ data: [], error: { message: 'Supabase not configured yet.' } }),
+    channel: () => mockChannel,
+    removeChannel: () => {},
   }
 }
 

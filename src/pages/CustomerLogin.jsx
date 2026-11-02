@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, useLocation, Navigate, Link } from 'react-router-dom'
 import { useCustomerAuth } from '../context/CustomerAuthContext'
 import toast from 'react-hot-toast'
 import { Leaf, Loader2, Eye, EyeOff } from 'lucide-react'
@@ -28,6 +28,8 @@ function Field({ label, name, type, placeholder, value, onChange, error, rightEl
 export default function CustomerLogin() {
   const { signIn, signUp, customer } = useCustomerAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const redirectTo = location.state?.from || '/my-orders'
   const [tab, setTab] = useState('login') // 'login' | 'signup'
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -35,10 +37,7 @@ export default function CustomerLogin() {
   const [errors, setErrors] = useState({})
 
   // Redirect if already logged in
-  if (customer) {
-    navigate('/my-orders')
-    return null
-  }
+  if (customer) return <Navigate to={redirectTo} replace />
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -70,7 +69,7 @@ export default function CustomerLogin() {
     try {
       await signIn(form.email, form.password)
       toast.success('Welcome back! 🌿')
-      navigate('/my-orders')
+      navigate(redirectTo, { replace: true })
     } catch (err) {
       toast.error(err.message || 'Login failed')
     } finally {
@@ -84,9 +83,14 @@ export default function CustomerLogin() {
     if (Object.keys(errs).length) { setErrors(errs); return }
     setLoading(true)
     try {
-      await signUp(form.email, form.password, form.fullName)
-      toast.success('Account created! Please check your email to confirm, then login.')
-      setTab('login')
+      const data = await signUp(form.email, form.password, form.fullName)
+      if (data?.session) {
+        toast.success('Account created! 🌿')
+        navigate(redirectTo, { replace: true })
+      } else {
+        toast.success('Account created! Check your email to confirm, then log in.')
+        setTab('login')
+      }
     } catch (err) {
       toast.error(err.message || 'Signup failed')
     } finally {
