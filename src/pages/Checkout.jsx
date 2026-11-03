@@ -4,7 +4,6 @@ import { useCart } from '../context/CartContext'
 import { useProducts } from '../context/ProductsContext'
 import { useCustomerAuth } from '../context/CustomerAuthContext'
 import { supabase, supabaseConfigured } from '../lib/supabase'
-import { sendTelegramNotification, formatOrderMessage } from '../lib/telegram'
 import toast from 'react-hot-toast'
 import { ShoppingBag, Loader2 } from 'lucide-react'
 
@@ -146,15 +145,6 @@ export default function Checkout() {
       const finalItems = saved?.items ?? cart
       const finalTotal = saved ? Number(saved.total) : cartTotal
 
-      await sendTelegramNotification(formatOrderMessage({
-        id: orderId,
-        customerName: form.fullName,
-        phone: form.phone,
-        address: `${form.address}, ${form.city} - ${form.pincode}`,
-        items: finalItems,
-        total: finalTotal,
-        notes: form.notes,
-      }))
 
       clearCart()
       refreshProducts()

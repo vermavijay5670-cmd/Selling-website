@@ -33,3 +33,11 @@ Also run `supabase-migration-order-safety.sql` (server-side pricing + stock). `v
    Only users in the `admins` table can open `/admin/*`; ordinary customers cannot.
 3. Copy `.env.example` to `.env` and fill in your keys.
 4. (Optional) Authentication -> Providers -> Email: turn off "Confirm email" if you want instant signup login.
+
+### Telegram order alerts (server-side)
+The bot token is NOT in the website. It lives in a Supabase Edge Function.
+1. Supabase -> Edge Functions -> Deploy a new function -> Via Editor. Name: `notify-order`. Paste `supabase/functions/notify-order/index.ts`, deploy.
+2. Open the function -> Details -> turn OFF "Enforce JWT Verification" (the database trigger calls it with its own secret header).
+3. Edge Functions -> Secrets: add `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `WEBHOOK_SECRET` (any long random string).
+4. Edit `supabase-migration-telegram.sql` (project ref + the same secret) and run it in the SQL Editor.
+5. Delete the old `VITE_TELEGRAM_*` variables from `.env` and Vercel.
