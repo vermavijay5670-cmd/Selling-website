@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import toast from 'react-hot-toast'
-import { Leaf, Loader2 } from 'lucide-react'
+import { Leaf, Loader2, ArrowLeft } from 'lucide-react'
 
 export default function AdminLogin() {
   const { adminLogin } = useAuth()
@@ -30,7 +30,10 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm">
+      <div className="relative bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm">
+        <Link to="/" title="Back to website" className="absolute top-4 left-4 text-gray-400 hover:text-gray-700 transition-colors">
+          <ArrowLeft className="w-5 h-5" />
+        </Link>
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 bg-green-100 rounded-2xl mb-3">
             <Leaf className="w-7 h-7 text-green-600" />

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../lib/supabase'
-import { ShoppingBag, Package, DollarSign, Archive, LogOut, Leaf, ExternalLink } from 'lucide-react'
+import { ShoppingBag, Package, DollarSign, Archive, LogOut, Leaf, ExternalLink, ArrowLeft } from 'lucide-react'
 
 export default function AdminDashboard() {
   const { admin, adminLogout } = useAuth()
@@ -67,7 +67,12 @@ export default function AdminDashboard() {
       </nav>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Dashboard</h1>
+        <div className="flex items-center gap-3 mb-6">
+          <Link to="/" title="Back to website" className="text-gray-400 hover:text-gray-700 transition-colors">
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+        </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">

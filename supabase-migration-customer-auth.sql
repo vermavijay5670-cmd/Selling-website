@@ -60,9 +60,10 @@ DROP POLICY IF EXISTS "Admin can update products" ON products;
 DROP POLICY IF EXISTS "Admin can insert products" ON products;
 DROP POLICY IF EXISTS "Customers can view own orders" ON orders;
 
--- guests may order (user_id null); logged-in customers may only order as themselves
+-- login required: customers can only place orders as themselves
+DROP POLICY IF EXISTS "Place orders" ON orders;
 CREATE POLICY "Place orders" ON orders FOR INSERT
-  WITH CHECK (user_id IS NULL OR user_id = auth.uid());
+  WITH CHECK (user_id = auth.uid());
 
 CREATE POLICY "Customers can view own orders" ON orders FOR SELECT
   USING (user_id = auth.uid() OR public.is_admin());

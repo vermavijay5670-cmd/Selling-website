@@ -13,7 +13,7 @@ export default function OrderConfirmation() {
     )
   }
 
-  const { orderId, customerName, phone, total, items, loggedIn } = state
+  const { orderId, customerName, phone, total, items } = state
   const shortId = String(orderId).slice(0, 8).toUpperCase()
 
   return (
@@ -58,14 +58,11 @@ export default function OrderConfirmation() {
         </div>
 
         <Link
-          to={loggedIn ? '/my-orders' : `/track?id=${shortId}`}
+          to="/my-orders"
           className="w-full inline-block border-2 border-green-600 text-green-700 hover:bg-green-50 font-semibold py-3 rounded-xl transition-colors mb-3"
         >
           Track This Order 🚚
         </Link>
-        {!loggedIn && (
-          <p className="text-xs text-gray-400 mb-3">Save your Order ID <span className="font-mono">#{shortId}</span> and phone number to track later.</p>
-        )}
         <Link
           to="/products"
           className="w-full inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition-colors"

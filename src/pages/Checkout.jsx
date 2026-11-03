@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Navigate, Link } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { useCustomerAuth } from '../context/CustomerAuthContext'
 import { supabase, supabaseConfigured } from '../lib/supabase'
@@ -46,7 +46,7 @@ function Field({ label, name, type, required, placeholder, as, value, onChange, 
 
 export default function Checkout() {
   const { cart, cartTotal, clearCart } = useCart()
-  const { customer } = useCustomerAuth()
+  const { customer, customerLoading } = useCustomerAuth()
   const navigate = useNavigate()
   const [form, setForm] = useState(INITIAL_FORM)
   const [errors, setErrors] = useState({})
@@ -61,6 +61,15 @@ export default function Checkout() {
       email: prev.email || customer.email || '',
     }))
   }, [customer])
+
+  if (customerLoading) {
+    return <div className="flex items-center justify-center min-h-[50vh] text-gray-400">Loading...</div>
+  }
+
+  // Must be logged in to check out
+  if (!customer) {
+    return <Navigate to="/login" state={{ from: '/checkout' }} replace />
+  }
 
   if (cart.length === 0) {
     return (
@@ -108,7 +117,7 @@ export default function Checkout() {
       const orderId = crypto.randomUUID()
       const orderData = {
         id: orderId,
-        user_id: customer?.id ?? null,
+        user_id: customer.id,
         customer_name: form.fullName,
         email: form.email,
         phone: form.phone,
@@ -144,7 +153,7 @@ export default function Checkout() {
       clearCart()
       toast.success('Order placed successfully!')
       navigate('/order-confirmation', {
-        state: { orderId, customerName: form.fullName, phone: form.phone, total: cartTotal, items: cart, loggedIn: !!customer }
+        state: { orderId, customerName: form.fullName, phone: form.phone, total: cartTotal, items: cart, loggedIn: true }
       })
     } catch (err) {
       console.error(err)
@@ -171,11 +180,6 @@ export default function Checkout() {
         <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-4">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <h2 className="font-semibold text-gray-800 mb-4 text-lg">Delivery Details</h2>
-            {!customer && (
-              <p className="text-xs text-gray-500 bg-green-50 border border-green-100 rounded-lg px-3 py-2 mb-4">
-                <Link to="/login" state={{ from: '/checkout' }} className="text-green-700 font-semibold hover:underline">Log in</Link> to save this order to your account and track it anytime. Or continue as guest.
-              </p>
-            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label="Full Name" required placeholder="Ramesh Kumar" {...fieldProps('fullName')} />
               <Field label="Email Address" type="email" required placeholder="ramesh@example.com" {...fieldProps('email')} />

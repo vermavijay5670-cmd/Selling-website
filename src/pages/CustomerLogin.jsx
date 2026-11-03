@@ -117,7 +117,9 @@ export default function CustomerLogin() {
             {tab === 'login' ? 'Welcome Back!' : 'Create Account'}
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            {tab === 'login' ? 'Login to track your orders' : 'Join GreenBasket today'}
+            {location.state?.from === '/checkout'
+              ? 'Please log in or sign up to place your order'
+              : tab === 'login' ? 'Login to track your orders' : 'Join GreenBasket today'}
           </p>
         </div>
 

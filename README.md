@@ -19,7 +19,9 @@ If you are developing a production application, we recommend using TypeScript wi
 
 ## Customer accounts & order tracking
 
-Routes: `/login` (login/signup), `/my-orders` (history + live status timeline), `/track` (guest tracking by Order ID + phone).
+Routes: `/login` (login/signup), `/my-orders` (history + live status timeline), `/track` (lookup by Order ID + phone, mainly for older guest orders).
+
+Checkout requires login. Admin pages have a back arrow to the website.
 
 ### Setup (once)
 1. Supabase SQL Editor: run `supabase-schema.sql`, then `supabase-migration-customer-auth.sql`.
