@@ -1,14 +1,19 @@
 import { useParams, Link } from 'react-router-dom'
-import { products } from '../data/products'
+import { useProducts } from '../context/ProductsContext'
 import { useCart } from '../context/CartContext'
 import { Plus, Minus, ShoppingCart, ArrowLeft } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function ProductDetail() {
   const { id } = useParams()
+  const { products, loading } = useProducts()
   const product = products.find(p => p.id === Number(id))
   const { cart, addToCart, updateQuantity } = useCart()
   const cartItem = cart.find(item => item.id === product?.id)
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-[50vh] text-gray-400">Loading...</div>
+  }
 
   if (!product) {
     return (

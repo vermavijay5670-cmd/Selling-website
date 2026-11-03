@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { CartProvider } from './context/CartContext'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { ProductsProvider } from './context/ProductsContext'
 import { CustomerAuthProvider } from './context/CustomerAuthContext'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -63,6 +64,7 @@ export default function App() {
   return (
     <AuthProvider>
       <CustomerAuthProvider>
+      <ProductsProvider>
       <CartProvider>
         <Toaster
           position="top-right"
@@ -73,6 +75,7 @@ export default function App() {
         />
         <AppLayout />
       </CartProvider>
+      </ProductsProvider>
       </CustomerAuthProvider>
     </AuthProvider>
   )

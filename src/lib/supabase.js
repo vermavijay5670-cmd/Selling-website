@@ -81,11 +81,21 @@ function createMockClient() {
     rpc: async () => ({ data: [], error: { message: 'Supabase not configured yet.' } }),
     channel: () => mockChannel,
     removeChannel: () => {},
+    storage: {
+      from: () => ({
+        upload: async () => ({ data: null, error: { message: 'Supabase not configured yet.' } }),
+        getPublicUrl: () => ({ data: { publicUrl: '' } }),
+        remove: async () => ({ data: null, error: null }),
+      }),
+    },
   }
 }
 
 export const supabase = isConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      // keep the session (admin + customer) across visits and refresh the token automatically
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+    })
   : createMockClient()
 
 export const supabaseConfigured = isConfigured

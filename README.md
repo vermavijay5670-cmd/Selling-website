@@ -21,7 +21,8 @@ If you are developing a production application, we recommend using TypeScript wi
 
 Routes: `/login` (login/signup), `/my-orders` (history + live status timeline), `/track` (lookup by Order ID + phone, mainly for older guest orders).
 
-Checkout requires login. Admin pages have a back arrow to the website.
+Checkout requires login. Admin stays signed in between visits. Manage Products supports add / edit / remove with camera or device photo upload (run `supabase-migration-products.sql`).
+
 
 ### Setup (once)
 1. Supabase SQL Editor: run `supabase-schema.sql`, then `supabase-migration-customer-auth.sql`.

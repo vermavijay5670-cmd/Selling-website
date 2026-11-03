@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Navigate, Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import toast from 'react-hot-toast'
 import { Leaf, Loader2, ArrowLeft } from 'lucide-react'
 
 export default function AdminLogin() {
-  const { adminLogin } = useAuth()
+  const { adminLogin, admin, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -27,6 +27,9 @@ export default function AdminLogin() {
       setLoading(false)
     }
   }
+
+  // Already signed in (session is remembered) -> skip the login form
+  if (!authLoading && admin) return <Navigate to="/admin/dashboard" replace />
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">

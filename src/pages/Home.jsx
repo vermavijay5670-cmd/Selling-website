@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ShoppingBag, Truck, Leaf, Shield, Star } from 'lucide-react'
-import { products, categories } from '../data/products'
+import { categories } from '../data/products'
+import { useProducts } from '../context/ProductsContext'
 import ProductCard from '../components/ProductCard'
 
 const features = [
@@ -23,6 +24,7 @@ const testimonials = [
 ]
 
 export default function Home() {
+  const { products } = useProducts()
   const featuredProducts = products.slice(0, 8)
 
   return (
