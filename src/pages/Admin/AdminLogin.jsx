@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useNavigate, Navigate, Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { useSettings } from '../../context/SettingsContext'
 import toast from 'react-hot-toast'
 import { Leaf, Loader2, ArrowLeft } from 'lucide-react'
 
 export default function AdminLogin() {
   const { adminLogin, admin, loading: authLoading } = useAuth()
+  const { shopName } = useSettings()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -42,7 +44,7 @@ export default function AdminLogin() {
             <Leaf className="w-7 h-7 text-green-600" />
           </div>
           <h1 className="text-2xl font-bold text-gray-800">Admin Login</h1>
-          <p className="text-sm text-gray-500 mt-1">GreenBasket Admin Panel</p>
+          <p className="text-sm text-gray-500 mt-1">{shopName} Admin Panel</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

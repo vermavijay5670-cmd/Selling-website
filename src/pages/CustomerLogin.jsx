@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useLocation, Navigate, Link } from 'react-router-dom'
 import { useCustomerAuth } from '../context/CustomerAuthContext'
+import { useSettings } from '../context/SettingsContext'
 import toast from 'react-hot-toast'
 import { Leaf, Loader2, Eye, EyeOff } from 'lucide-react'
 
@@ -27,6 +28,7 @@ function Field({ label, name, type, placeholder, value, onChange, error, rightEl
 
 export default function CustomerLogin() {
   const { signIn, signUp, customer } = useCustomerAuth()
+  const { shopName } = useSettings()
   const navigate = useNavigate()
   const location = useLocation()
   const redirectTo = location.state?.from || '/my-orders'
@@ -111,7 +113,7 @@ export default function CustomerLogin() {
         <div className="text-center mb-6">
           <Link to="/" className="inline-flex items-center gap-2 text-green-700 font-bold text-xl mb-4">
             <Leaf className="w-6 h-6" />
-            GreenBasket
+            {shopName}
           </Link>
           <h1 className="text-2xl font-bold text-gray-800">
             {tab === 'login' ? 'Welcome Back!' : 'Create Account'}
@@ -119,7 +121,7 @@ export default function CustomerLogin() {
           <p className="text-sm text-gray-500 mt-1">
             {location.state?.from === '/checkout'
               ? 'Please log in or sign up to place your order'
-              : tab === 'login' ? 'Login to track your orders' : 'Join GreenBasket today'}
+              : tab === 'login' ? 'Login to track your orders' : `Join ${shopName} today`}
           </p>
         </div>
 

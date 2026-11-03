@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCustomerAuth } from '../context/CustomerAuthContext'
+import { useSettings } from '../context/SettingsContext'
 import { supabase } from '../lib/supabase'
 import OrderTimeline, { STATUS_INFO } from '../components/OrderTimeline'
 import { Leaf, Package, LogOut, ShoppingBag, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
 
 export default function CustomerOrders() {
   const { customer, signOut, customerLoading } = useCustomerAuth()
+  const { shopName } = useSettings()
   const navigate = useNavigate()
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
@@ -78,7 +80,7 @@ export default function CustomerOrders() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-green-700 font-bold text-lg">
             <Leaf className="w-5 h-5" />
-            GreenBasket
+            {shopName}
           </Link>
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-2">

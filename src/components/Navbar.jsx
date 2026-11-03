@@ -3,11 +3,13 @@ import { Link, NavLink } from 'react-router-dom'
 import { ShoppingCart, Menu, X, Leaf, User, PackageSearch } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useCustomerAuth } from '../context/CustomerAuthContext'
+import { useSettings } from '../context/SettingsContext'
 import SearchBar from './SearchBar'
 
 export default function Navbar({ onSearch }) {
   const { cartCount, setIsCartOpen } = useCart()
   const { customer } = useCustomerAuth()
+  const { shopName } = useSettings()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const navLinks = [
@@ -22,7 +24,7 @@ export default function Navbar({ onSearch }) {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 text-white font-bold text-xl">
             <Leaf className="w-7 h-7 text-green-200" />
-            <span className="tracking-tight">GreenBasket</span>
+            <span className="tracking-tight truncate max-w-[10rem] sm:max-w-none">{shopName}</span>
           </Link>
 
           {/* Desktop Nav Links */}

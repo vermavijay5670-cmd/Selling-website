@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { ShoppingBag, Truck, Leaf, Shield, Star } from 'lucide-react'
 import { categories } from '../data/products'
 import { useProducts } from '../context/ProductsContext'
+import { useSettings } from '../context/SettingsContext'
 import ProductCard from '../components/ProductCard'
 
 const features = [
@@ -19,12 +20,13 @@ const whyUs = [
 
 const testimonials = [
   { name: 'Priya S.', city: 'Bengaluru', text: 'The freshest vegetables I have ever had delivered at home. The spices are aromatic and pure quality!', stars: 5 },
-  { name: 'Ramesh K.', city: 'Chennai', text: 'GreenBasket has made my kitchen life so easy. Great prices and super fast delivery. Highly recommended!', stars: 5 },
+  { name: 'Ramesh K.', city: 'Chennai', text: '{shop} has made my kitchen life so easy. Great prices and super fast delivery. Highly recommended!', stars: 5 },
   { name: 'Anita M.', city: 'Hyderabad', text: 'Love the variety of spices available. The garam masala is simply outstanding. Will keep ordering!', stars: 5 },
 ]
 
 export default function Home() {
   const { products } = useProducts()
+  const { shopName } = useSettings()
   const featuredProducts = products.slice(0, 8)
 
   return (
@@ -111,7 +113,7 @@ export default function Home() {
 
       {/* Why Choose Us */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2 text-center">Why Choose GreenBasket?</h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2 text-center">Why Choose {shopName}?</h2>
         <p className="text-gray-500 text-center mb-10">We are committed to your health and satisfaction</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {whyUs.map((item, i) => (
@@ -139,7 +141,7 @@ export default function Home() {
                     <Star key={si} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                   ))}
                 </div>
-                <p className="text-gray-600 text-sm leading-relaxed mb-4">"{t.text}"</p>
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">"{t.text.replace('{shop}', shopName)}"</p>
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-sm">
                     {t.name[0]}

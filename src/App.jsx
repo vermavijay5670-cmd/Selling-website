@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { CartProvider } from './context/CartContext'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { SettingsProvider } from './context/SettingsContext'
 import { ProductsProvider } from './context/ProductsContext'
 import { CustomerAuthProvider } from './context/CustomerAuthContext'
 import Navbar from './components/Navbar'
@@ -19,6 +20,7 @@ import TrackOrder from './pages/TrackOrder'
 import AdminLogin from './pages/Admin/AdminLogin'
 import AdminDashboard from './pages/Admin/AdminDashboard'
 import AdminProducts from './pages/Admin/AdminProducts'
+import AdminSettings from './pages/Admin/AdminSettings'
 import AdminOrders from './pages/Admin/AdminOrders'
 import { useState } from 'react'
 
@@ -52,6 +54,7 @@ function AppLayout() {
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/products" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
+          <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
           <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
         </Routes>
       </main>
@@ -64,6 +67,7 @@ export default function App() {
   return (
     <AuthProvider>
       <CustomerAuthProvider>
+      <SettingsProvider>
       <ProductsProvider>
       <CartProvider>
         <Toaster
@@ -76,6 +80,7 @@ export default function App() {
         <AppLayout />
       </CartProvider>
       </ProductsProvider>
+      </SettingsProvider>
       </CustomerAuthProvider>
     </AuthProvider>
   )

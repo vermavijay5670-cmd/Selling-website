@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { useSettings } from '../../context/SettingsContext'
 import { supabase } from '../../lib/supabase'
-import { ShoppingBag, Package, DollarSign, Archive, LogOut, Leaf, ExternalLink, ArrowLeft } from 'lucide-react'
+import { ShoppingBag, Package, DollarSign, Archive, LogOut, Leaf, ExternalLink, ArrowLeft, Settings } from 'lucide-react'
 
 export default function AdminDashboard() {
   const { admin, adminLogout } = useAuth()
+  const { shopName } = useSettings()
   const navigate = useNavigate()
   const [stats, setStats] = useState({ total: 0, pending: 0, revenue: 0, products: 0 })
 
@@ -49,7 +51,7 @@ export default function AdminDashboard() {
       <nav className="bg-green-700 text-white px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2 font-bold text-lg">
           <Leaf className="w-6 h-6" />
-          <span>GreenBasket Admin</span>
+          <span>{shopName} Admin</span>
         </div>
         <div className="flex items-center gap-3">
           <Link
@@ -88,7 +90,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick Links */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <Link to="/admin/orders" className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group">
             <ShoppingBag className="w-8 h-8 text-orange-500 mb-3 group-hover:scale-110 transition-transform" />
             <h3 className="font-semibold text-gray-800 text-lg">Manage Orders</h3>
@@ -98,6 +100,11 @@ export default function AdminDashboard() {
             <Archive className="w-8 h-8 text-green-600 mb-3 group-hover:scale-110 transition-transform" />
             <h3 className="font-semibold text-gray-800 text-lg">Manage Products</h3>
             <p className="text-sm text-gray-500 mt-1">Edit stock and product visibility</p>
+          </Link>
+          <Link to="/admin/settings" className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group">
+            <Settings className="w-8 h-8 text-blue-500 mb-3 group-hover:scale-110 transition-transform" />
+            <h3 className="font-semibold text-gray-800 text-lg">Shop Settings</h3>
+            <p className="text-sm text-gray-500 mt-1">Shop name, contact details and footer text</p>
           </Link>
         </div>
       </div>
