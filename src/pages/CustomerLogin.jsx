@@ -27,7 +27,7 @@ function Field({ label, name, type, placeholder, value, onChange, error, rightEl
 }
 
 export default function CustomerLogin() {
-  const { signIn, signUp, customer } = useCustomerAuth()
+  const { signIn, signUp, resetPassword, customer } = useCustomerAuth()
   const { shopName } = useSettings()
   const navigate = useNavigate()
   const location = useLocation()
@@ -100,6 +100,24 @@ export default function CustomerLogin() {
     }
   }
 
+  const handleForgot = async (e) => {
+    e.preventDefault()
+    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      setErrors({ email: 'Valid email required' })
+      return
+    }
+    setLoading(true)
+    try {
+      await resetPassword(form.email.trim())
+      toast.success('If that email has an account, a reset link is on its way.')
+      setTab('login')
+    } catch (err) {
+      toast.error(err.message || 'Could not send reset email')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const eyeBtn = (
     <button type="button" onClick={() => setShowPassword(p => !p)} className="text-gray-400 hover:text-gray-600">
       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -116,17 +134,17 @@ export default function CustomerLogin() {
             {shopName}
           </Link>
           <h1 className="text-2xl font-bold text-gray-800">
-            {tab === 'login' ? 'Welcome Back!' : 'Create Account'}
+            {tab === 'login' ? 'Welcome Back!' : tab === 'forgot' ? 'Reset Password' : 'Create Account'}
           </h1>
           <p className="text-sm text-gray-500 mt-1">
             {location.state?.from === '/checkout'
               ? 'Please log in or sign up to place your order'
-              : tab === 'login' ? 'Login to track your orders' : `Join ${shopName} today`}
+              : tab === 'login' ? 'Login to track your orders' : tab === 'forgot' ? "We'll email you a link to set a new password" : `Join ${shopName} today`}
           </p>
         </div>
 
         {/* Tabs */}
-        <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
+        {tab !== 'forgot' && <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
           {['login', 'signup'].map(t => (
             <button
               key={t}
@@ -136,7 +154,20 @@ export default function CustomerLogin() {
               {t === 'login' ? 'Login' : 'Sign Up'}
             </button>
           ))}
-        </div>
+        </div>}
+
+        {/* Forgot Password Form */}
+        {tab === 'forgot' && (
+          <form onSubmit={handleForgot} className="space-y-4">
+            <Field label="Email Address" name="email" type="email" placeholder="you@example.com" value={form.email} onChange={handleChange} error={errors.email} />
+            <button type="submit" disabled={loading} className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+              {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</> : 'Send Reset Link'}
+            </button>
+            <button type="button" onClick={() => { setTab('login'); setErrors({}) }} className="w-full text-sm text-gray-500 hover:text-gray-700">
+              ← Back to login
+            </button>
+          </form>
+        )}
 
         {/* Login Form */}
         {tab === 'login' && (
@@ -145,6 +176,9 @@ export default function CustomerLogin() {
             <Field label="Password" name="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={form.password} onChange={handleChange} error={errors.password} rightElement={eyeBtn} />
             <button type="submit" disabled={loading} className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
               {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Logging in...</> : 'Login'}
+            </button>
+            <button type="button" onClick={() => { setTab('forgot'); setErrors({}) }} className="w-full text-sm text-green-600 hover:underline">
+              Forgot password?
             </button>
           </form>
         )}

@@ -24,6 +24,8 @@ Routes: `/login` (login/signup), `/my-orders` (history + live status timeline), 
 Checkout requires login. Admin stays signed in between visits. Manage Products supports add / edit / remove with camera or device photo upload (run `supabase-migration-products.sql`). Admin can edit the shop name, contact details and footer text under Admin -> Shop Settings (run `supabase-migration-settings.sql`).
 
 
+Also run `supabase-migration-order-safety.sql` (server-side pricing + stock). `vercel.json` / `public/_redirects` make direct links work on Vercel/Netlify. Forgot-password: add your site URL under Supabase -> Authentication -> URL Configuration (Site URL + Redirect URLs, including `/reset-password`).
+
 ### Setup (once)
 1. Supabase SQL Editor: run `supabase-schema.sql`, then `supabase-migration-customer-auth.sql`.
 2. Create your admin user in Supabase -> Authentication -> Users, then run:

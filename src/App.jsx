@@ -17,6 +17,7 @@ import OrderConfirmation from './pages/OrderConfirmation'
 import CustomerLogin from './pages/CustomerLogin'
 import CustomerOrders from './pages/CustomerOrders'
 import TrackOrder from './pages/TrackOrder'
+import ResetPassword from './pages/ResetPassword'
 import AdminLogin from './pages/Admin/AdminLogin'
 import AdminDashboard from './pages/Admin/AdminDashboard'
 import AdminProducts from './pages/Admin/AdminProducts'
@@ -33,7 +34,7 @@ function ProtectedRoute({ children }) {
 function AppLayout() {
   const location = useLocation()
   const isAdmin = location.pathname.startsWith('/admin')
-  const isStandalone = isAdmin || location.pathname === '/login' || location.pathname === '/my-orders'
+  const isStandalone = isAdmin || ['/login', '/my-orders', '/reset-password'].includes(location.pathname)
   const [globalSearch, setGlobalSearch] = useState('')
 
   return (
@@ -50,6 +51,7 @@ function AppLayout() {
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
           <Route path="/login" element={<CustomerLogin />} />
           <Route path="/my-orders" element={<CustomerOrders />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/track" element={<TrackOrder />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />

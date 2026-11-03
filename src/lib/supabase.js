@@ -57,6 +57,8 @@ function createMockClient() {
     onAuthStateChange: (_event, _cb) => ({ data: { subscription: { unsubscribe: () => {} } } }),
     signInWithPassword: async () => ({ data: null, error: { message: 'Supabase not configured yet. Please add your credentials.' } }),
     signUp: async () => ({ data: null, error: { message: 'Supabase not configured yet. Please add your credentials.' } }),
+    resetPasswordForEmail: async () => ({ data: null, error: { message: 'Supabase not configured yet.' } }),
+    updateUser: async () => ({ data: null, error: { message: 'Supabase not configured yet.' } }),
     signOut: noOp,
   }
 

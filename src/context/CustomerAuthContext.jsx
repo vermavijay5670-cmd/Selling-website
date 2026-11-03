@@ -33,13 +33,25 @@ export function CustomerAuthProvider({ children }) {
     return data
   }
 
+  const resetPassword = async (email) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+    if (error) throw error
+  }
+
+  const updatePassword = async (password) => {
+    const { error } = await supabase.auth.updateUser({ password })
+    if (error) throw error
+  }
+
   const signOut = async () => {
     await supabase.auth.signOut()
     setCustomer(null)
   }
 
   return (
-    <CustomerAuthContext.Provider value={{ customer, customerLoading, signUp, signIn, signOut }}>
+    <CustomerAuthContext.Provider value={{ customer, customerLoading, signUp, signIn, signOut, resetPassword, updatePassword }}>
       {children}
     </CustomerAuthContext.Provider>
   )

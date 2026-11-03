@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Navigate, Link } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
+import { useProducts } from '../context/ProductsContext'
 import { useCustomerAuth } from '../context/CustomerAuthContext'
 import { supabase, supabaseConfigured } from '../lib/supabase'
 import { sendTelegramNotification, formatOrderMessage } from '../lib/telegram'
@@ -47,6 +48,7 @@ function Field({ label, name, type, required, placeholder, as, value, onChange, 
 export default function Checkout() {
   const { cart, cartTotal, clearCart } = useCart()
   const { customer, customerLoading } = useCustomerAuth()
+  const { refresh: refreshProducts } = useProducts()
   const navigate = useNavigate()
   const [form, setForm] = useState(INITIAL_FORM)
   const [errors, setErrors] = useState({})
@@ -112,8 +114,6 @@ export default function Checkout() {
 
     setLoading(true)
     try {
-      // Generate the id here: guests can't SELECT the row back under RLS,
-      // so insert(...).select() would fail for them.
       const orderId = crypto.randomUUID()
       const orderData = {
         id: orderId,
@@ -132,28 +132,35 @@ export default function Checkout() {
         payment_method: 'cod',
       }
 
-      const { error } = await supabase.from('orders').insert([orderData])
+      // The database re-prices the order from the products table and checks stock,
+      // so use the row it returns (not our local cart) for totals and items.
+      const { data: saved, error } = await supabase.from('orders').insert([orderData]).select().single()
 
       if (error && supabaseConfigured) {
         console.error('Order save failed:', error)
-        toast.error('Could not place your order. Please try again.')
+        // P0001 = a friendly message raised by the database (e.g. "Not enough stock for Tomatoes")
+        toast.error(error.code === 'P0001' ? error.message : 'Could not place your order. Please try again.')
+        if (error.code === 'P0001') refreshProducts()
         return
       }
+      const finalItems = saved?.items ?? cart
+      const finalTotal = saved ? Number(saved.total) : cartTotal
 
       await sendTelegramNotification(formatOrderMessage({
         id: orderId,
         customerName: form.fullName,
         phone: form.phone,
         address: `${form.address}, ${form.city} - ${form.pincode}`,
-        items: cart,
-        total: cartTotal,
+        items: finalItems,
+        total: finalTotal,
         notes: form.notes,
       }))
 
       clearCart()
+      refreshProducts()
       toast.success('Order placed successfully!')
       navigate('/order-confirmation', {
-        state: { orderId, customerName: form.fullName, phone: form.phone, total: cartTotal, items: cart, loggedIn: true }
+        state: { orderId, customerName: form.fullName, phone: form.phone, total: finalTotal, items: finalItems, loggedIn: true }
       })
     } catch (err) {
       console.error(err)
