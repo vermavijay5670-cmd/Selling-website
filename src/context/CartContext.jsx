@@ -1,8 +1,11 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useRef } from 'react'
+import toast from 'react-hot-toast'
+import { useProducts } from './ProductsContext'
 
 const CartContext = createContext()
 
 export function CartProvider({ children }) {
+  const { products, live } = useProducts()
   const [cart, setCart] = useState(() => {
     try {
       const saved = localStorage.getItem('greenbasket-cart')
@@ -12,20 +15,50 @@ export function CartProvider({ children }) {
     }
   })
   const [isCartOpen, setIsCartOpen] = useState(false)
+  const cartRef = useRef(cart)
 
   useEffect(() => {
+    cartRef.current = cart
     localStorage.setItem('greenbasket-cart', JSON.stringify(cart))
   }, [cart])
 
+  // Keep the saved cart in line with the live shop: refresh prices, drop products that were
+  // removed or sold out, and cap quantities at the available stock.
+  useEffect(() => {
+    if (!live) return
+    const byId = new Map(products.map(p => [p.id, p]))
+    const removed = []
+    const adjusted = []
+    let changed = false
+    const next = []
+
+    for (const item of cartRef.current) {
+      const p = byId.get(item.id)
+      if (!p || p.stock < 1) { removed.push(item.name); changed = true; continue }
+      const quantity = Math.min(item.quantity, p.stock)
+      if (quantity !== item.quantity) adjusted.push(p.name)
+      const updated = { ...item, name: p.name, price: p.price, unit: p.unit, image: p.image, stock: p.stock, quantity }
+      if (['name', 'price', 'unit', 'image', 'stock', 'quantity'].some(k => updated[k] !== item[k])) changed = true
+      next.push(updated)
+    }
+
+    if (!changed) return
+    setCart(next)
+    if (removed.length) toast.error(`No longer available, removed from cart: ${removed.join(', ')}`, { duration: 5000 })
+    if (adjusted.length) toast(`Quantity reduced to available stock: ${adjusted.join(', ')}`, { duration: 5000 })
+  }, [products, live])
+
   const addToCart = (product) => {
+    const existing = cart.find(item => item.id === product.id)
+    const limit = product.stock ?? Infinity
+    if ((existing?.quantity ?? 0) + 1 > limit) {
+      toast.error(`Only ${limit} available`)
+      return
+    }
     setCart(prev => {
-      const existing = prev.find(item => item.id === product.id)
-      if (existing) {
-        return prev.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
+      const found = prev.find(item => item.id === product.id)
+      if (found) {
+        return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item)
       }
       return [...prev, { ...product, quantity: 1 }]
     })
@@ -40,9 +73,12 @@ export function CartProvider({ children }) {
       removeFromCart(id)
       return
     }
-    setCart(prev =>
-      prev.map(item => item.id === id ? { ...item, quantity: qty } : item)
-    )
+    const item = cart.find(i => i.id === id)
+    if (item?.stock != null && qty > item.stock) {
+      toast.error(`Only ${item.stock} available`)
+      qty = item.stock
+    }
+    setCart(prev => prev.map(i => i.id === id ? { ...i, quantity: qty } : i))
   }
 
   const clearCart = () => setCart([])

@@ -26,6 +26,8 @@ Checkout requires login. Admin stays signed in between visits. Manage Products s
 
 Also run `supabase-migration-order-safety.sql` (server-side pricing + stock). `vercel.json` / `public/_redirects` make direct links work on Vercel/Netlify. Forgot-password: add your site URL under Supabase -> Authentication -> URL Configuration (Site URL + Redirect URLs, including `/reset-password`).
 
+Also run `supabase-migration-admin-orders.sql` (dashboard stats + order list indexes).
+
 ### Setup (once)
 1. Supabase SQL Editor: run `supabase-schema.sql`, then `supabase-migration-customer-auth.sql`.
 2. Create your admin user in Supabase -> Authentication -> Users, then run:

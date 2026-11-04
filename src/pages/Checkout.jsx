@@ -53,6 +53,9 @@ export default function Checkout() {
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
 
+  // make sure cart prices/stock are current before the customer pays
+  useEffect(() => { refreshProducts() }, [refreshProducts])
+
   // Prefill name/email for logged-in customers
   useEffect(() => {
     if (!customer) return

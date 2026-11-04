@@ -50,7 +50,6 @@ const isConfigured =
 // so the app loads without crashing
 function createMockClient() {
   const noOp = async () => ({ data: null, error: null })
-  const noOpData = () => ({ data: [], error: null })
 
   const mockAuth = {
     getSession: async () => ({ data: { session: null }, error: null }),
@@ -68,6 +67,11 @@ function createMockClient() {
     update: () => mockQueryBuilder,
     delete: () => mockQueryBuilder,
     eq: () => mockQueryBuilder,
+    neq: () => mockQueryBuilder,
+    gte: () => mockQueryBuilder,
+    lte: () => mockQueryBuilder,
+    or: () => mockQueryBuilder,
+    range: () => mockQueryBuilder,
     maybeSingle: async () => ({ data: null, error: null }),
     order: () => mockQueryBuilder,
     limit: () => mockQueryBuilder,

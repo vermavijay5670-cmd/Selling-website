@@ -18,12 +18,13 @@ import CustomerLogin from './pages/CustomerLogin'
 import CustomerOrders from './pages/CustomerOrders'
 import TrackOrder from './pages/TrackOrder'
 import ResetPassword from './pages/ResetPassword'
+import NotFound from './pages/NotFound'
 import AdminLogin from './pages/Admin/AdminLogin'
 import AdminDashboard from './pages/Admin/AdminDashboard'
 import AdminProducts from './pages/Admin/AdminProducts'
 import AdminSettings from './pages/Admin/AdminSettings'
 import AdminOrders from './pages/Admin/AdminOrders'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 function ProtectedRoute({ children }) {
   const { admin, loading } = useAuth()
@@ -36,6 +37,9 @@ function AppLayout() {
   const isAdmin = location.pathname.startsWith('/admin')
   const isStandalone = isAdmin || ['/login', '/my-orders', '/reset-password'].includes(location.pathname)
   const [globalSearch, setGlobalSearch] = useState('')
+
+  // start each page at the top when navigating
+  useEffect(() => { window.scrollTo(0, 0) }, [location.pathname])
 
   return (
     <>
@@ -58,6 +62,7 @@ function AppLayout() {
           <Route path="/admin/products" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
           <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
           <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       {!isStandalone && <Footer />}

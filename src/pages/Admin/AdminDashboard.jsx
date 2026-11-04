@@ -17,6 +17,19 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
+      // preferred: computed in the database (needs supabase-migration-admin-orders.sql)
+      const { data: s, error: rpcError } = await supabase.rpc('admin_stats')
+      if (!rpcError && Array.isArray(s) && s[0]) {
+        setStats({
+          total: Number(s[0].total_orders),
+          pending: Number(s[0].pending_orders),
+          revenue: Number(s[0].revenue),
+          products: Number(s[0].product_count),
+        })
+        return
+      }
+
+      // fallback (limited to the first 1000 orders)
       const { data: orders } = await supabase.from('orders').select('total, status')
       const { count: productCount } = await supabase.from('products').select('*', { count: 'exact', head: true })
 
@@ -24,7 +37,7 @@ export default function AdminDashboard() {
         setStats({
           total: orders.length,
           pending: orders.filter(o => o.status === 'pending').length,
-          revenue: orders.reduce((sum, o) => sum + Number(o.total), 0),
+          revenue: orders.filter(o => o.status !== 'cancelled').reduce((sum, o) => sum + Number(o.total), 0),
           products: productCount || 0,
         })
       }
@@ -41,7 +54,7 @@ export default function AdminDashboard() {
   const statCards = [
     { label: 'Total Orders', value: stats.total, icon: <ShoppingBag className="w-6 h-6" />, color: 'text-blue-600 bg-blue-50' },
     { label: 'Pending Orders', value: stats.pending, icon: <Package className="w-6 h-6" />, color: 'text-orange-600 bg-orange-50' },
-    { label: 'Total Revenue', value: `₹${stats.revenue.toFixed(2)}`, icon: <DollarSign className="w-6 h-6" />, color: 'text-green-600 bg-green-50' },
+    { label: 'Revenue (excl. cancelled)', value: `₹${stats.revenue.toFixed(2)}`, icon: <DollarSign className="w-6 h-6" />, color: 'text-green-600 bg-green-50' },
     { label: 'Products', value: stats.products, icon: <Archive className="w-6 h-6" />, color: 'text-purple-600 bg-purple-50' },
   ]
 

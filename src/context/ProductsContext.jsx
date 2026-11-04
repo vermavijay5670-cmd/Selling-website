@@ -17,6 +17,7 @@ const normalize = (p) => ({
 export function ProductsProvider({ children }) {
   const [products, setProducts] = useState(localProducts)
   const [loading, setLoading] = useState(supabaseConfigured)
+  const [live, setLive] = useState(false) // true once the list came from the database (not the built-in fallback)
 
   const refresh = useCallback(async () => {
     if (!supabaseConfigured) { setLoading(false); return }
@@ -24,6 +25,7 @@ export function ProductsProvider({ children }) {
       const { data, error } = await supabase.from('products').select('*').order('id')
       if (!error && data && data.length > 0) {
         setProducts(data.filter(p => p.active !== false).map(normalize))
+        setLive(true)
       }
     } catch (err) {
       console.warn('Using local product data:', err.message)
@@ -34,8 +36,18 @@ export function ProductsProvider({ children }) {
 
   useEffect(() => { refresh() }, [refresh])
 
+  // pick up the admin's stock/price changes when a customer returns to the tab
+  useEffect(() => {
+    let last = Date.now()
+    const onVisible = () => {
+      if (document.visibilityState === 'visible' && Date.now() - last > 60_000) { last = Date.now(); refresh() }
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [refresh])
+
   return (
-    <ProductsContext.Provider value={{ products, loading, refresh }}>
+    <ProductsContext.Provider value={{ products, loading, live, refresh }}>
       {children}
     </ProductsContext.Provider>
   )
