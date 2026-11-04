@@ -28,6 +28,8 @@ Also run `supabase-migration-order-safety.sql` (server-side pricing + stock). `v
 
 Also run `supabase-migration-admin-orders.sql` (dashboard stats + order list indexes).
 
+Also run `supabase-migration-customer-cancel.sql` (lets customers cancel their own pending orders).
+
 ### Setup (once)
 1. Supabase SQL Editor: run `supabase-schema.sql`, then `supabase-migration-customer-auth.sql`.
 2. Create your admin user in Supabase -> Authentication -> Users, then run:

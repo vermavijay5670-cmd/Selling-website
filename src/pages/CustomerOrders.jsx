@@ -3,12 +3,14 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useCustomerAuth } from '../context/CustomerAuthContext'
 import { useSettings } from '../context/SettingsContext'
 import { supabase } from '../lib/supabase'
+import toast from 'react-hot-toast'
 import OrderTimeline, { STATUS_INFO } from '../components/OrderTimeline'
 import { Leaf, Package, LogOut, ShoppingBag, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
 
 export default function CustomerOrders() {
   const { customer, signOut, customerLoading } = useCustomerAuth()
-  const { shopName } = useSettings()
+  const { shopName, settings } = useSettings()
+  const [cancelling, setCancelling] = useState(null)
   const navigate = useNavigate()
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
@@ -50,6 +52,21 @@ export default function CustomerOrders() {
     } finally {
       setLoading(false)
       setRefreshing(false)
+    }
+  }
+
+  const handleCancel = async (order) => {
+    if (!window.confirm('Cancel this order? This cannot be undone.')) return
+    setCancelling(order.id)
+    try {
+      const { error } = await supabase.rpc('cancel_my_order', { p_order: order.id })
+      if (error) throw error
+      toast.success('Order cancelled')
+      await fetchOrders(true)
+    } catch (err) {
+      toast.error(err.message || 'Could not cancel the order')
+    } finally {
+      setCancelling(null)
     }
   }
 
@@ -238,6 +255,24 @@ export default function CustomerOrders() {
                           </div>
                         </div>
                       </div>
+
+                      {order.status === 'pending' && (
+                        <div className="px-5 pb-5 flex flex-wrap items-center gap-3">
+                          <button
+                            onClick={() => handleCancel(order)}
+                            disabled={cancelling === order.id}
+                            className="text-sm font-medium text-red-600 border border-red-200 hover:bg-red-50 disabled:opacity-50 px-4 py-2 rounded-xl transition-colors"
+                          >
+                            {cancelling === order.id ? 'Cancelling...' : 'Cancel Order'}
+                          </button>
+                          <span className="text-xs text-gray-400">You can cancel until the shop confirms your order.</span>
+                        </div>
+                      )}
+                      {order.status !== 'pending' && order.status !== 'cancelled' && order.status !== 'delivered' && settings.phone && (
+                        <p className="px-5 pb-5 text-xs text-gray-500">
+                          Need to change this order? Call <a href={`tel:${settings.phone.replace(/[^\d+]/g, '')}`} className="text-green-700 font-medium hover:underline">{settings.phone}</a>
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>

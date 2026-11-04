@@ -80,14 +80,6 @@ export default function Navbar({ onSearch }) {
               <span className="hidden sm:inline">{customer ? 'My Orders' : 'Login'}</span>
             </Link>
 
-            {/* Admin Link */}
-            <Link
-              to="/admin"
-              className="hidden sm:block text-xs text-green-200 hover:text-white transition-colors"
-            >
-              Admin
-            </Link>
-
             {/* Hamburger */}
             <button
               className="md:hidden text-white p-1"
@@ -121,13 +113,6 @@ export default function Navbar({ onSearch }) {
               onClick={() => setMobileOpen(false)}
             >
               Track Order
-            </Link>
-            <Link
-              to="/admin"
-              className="block text-xs text-green-200 hover:text-white px-2 py-1"
-              onClick={() => setMobileOpen(false)}
-            >
-              Admin Login
             </Link>
           </div>
         )}

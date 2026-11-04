@@ -19,12 +19,12 @@ import CustomerOrders from './pages/CustomerOrders'
 import TrackOrder from './pages/TrackOrder'
 import ResetPassword from './pages/ResetPassword'
 import NotFound from './pages/NotFound'
-import AdminLogin from './pages/Admin/AdminLogin'
-import AdminDashboard from './pages/Admin/AdminDashboard'
-import AdminProducts from './pages/Admin/AdminProducts'
-import AdminSettings from './pages/Admin/AdminSettings'
-import AdminOrders from './pages/Admin/AdminOrders'
-import { useState, useEffect } from 'react'
+const AdminLogin = lazy(() => import('./pages/Admin/AdminLogin'))
+const AdminDashboard = lazy(() => import('./pages/Admin/AdminDashboard'))
+const AdminProducts = lazy(() => import('./pages/Admin/AdminProducts'))
+const AdminSettings = lazy(() => import('./pages/Admin/AdminSettings'))
+const AdminOrders = lazy(() => import('./pages/Admin/AdminOrders'))
+import { useState, useEffect, lazy, Suspense } from 'react'
 
 function ProtectedRoute({ children }) {
   const { admin, loading } = useAuth()
@@ -46,6 +46,7 @@ function AppLayout() {
       {!isStandalone && <Navbar onSearch={setGlobalSearch} />}
       <CartSidebar />
       <main className="min-h-screen bg-gray-50">
+        <Suspense fallback={<div className="flex items-center justify-center min-h-[50vh] text-gray-400">Loading...</div>}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products globalSearch={globalSearch} />} />
@@ -64,6 +65,7 @@ function AppLayout() {
           <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
       </main>
       {!isStandalone && <Footer />}
     </>
