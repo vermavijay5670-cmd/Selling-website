@@ -4,6 +4,8 @@ import { useCart } from '../context/CartContext'
 import { Plus, Minus, ShoppingCart, ArrowLeft } from 'lucide-react'
 import toast from 'react-hot-toast'
 
+const NO_PHOTO = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect width="300" height="300" fill="#f3f4f6"/><text x="150" y="160" font-size="48" text-anchor="middle">🌿</text></svg>')
+
 export default function ProductDetail() {
   const { id } = useParams()
   const { products, loading } = useProducts()
@@ -41,6 +43,7 @@ export default function ProductDetail() {
           src={product.image}
           alt={product.name}
           className="w-full md:w-1/2 h-72 md:h-auto object-cover"
+          onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = NO_PHOTO }}
         />
         <div className="p-6 flex flex-col justify-center">
           {product.badge && (

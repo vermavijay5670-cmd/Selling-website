@@ -23,3 +23,9 @@ ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS phone TEXT NOT NULL DEFAULT '
 ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS email TEXT NOT NULL DEFAULT 'hello@greenbasket.in';
 ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS address TEXT NOT NULL DEFAULT E'123, Fresh Market Lane,\nBengaluru, Karnataka 560001';
 ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS tagline TEXT NOT NULL DEFAULT 'Your trusted source for farm-fresh vegetables, herbs, and authentic spices delivered straight to your doorstep.';
+
+-- Social links + customer reviews (added later; safe to re-run)
+ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS instagram TEXT NOT NULL DEFAULT '';
+ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS facebook  TEXT NOT NULL DEFAULT '';
+ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS whatsapp  TEXT NOT NULL DEFAULT '';
+ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS testimonials JSONB NOT NULL DEFAULT '[]'::jsonb;

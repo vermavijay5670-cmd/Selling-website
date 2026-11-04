@@ -1,6 +1,23 @@
 import { Link } from 'react-router-dom'
 import { useSettings } from '../context/SettingsContext'
-import { Leaf, Phone, Mail, MapPin, Share2, Users, MessageCircle } from 'lucide-react'
+import { Leaf, Phone, Mail, MapPin } from 'lucide-react'
+
+// brand icons drawn inline (newer lucide versions no longer ship them)
+const InstagramIcon = () => (
+  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="0.6" fill="currentColor" /></svg>
+)
+const FacebookIcon = () => (
+  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor"><path d="M13.5 22v-8h2.7l.5-3.2h-3.2V8.7c0-.9.4-1.7 1.8-1.7h1.5V4.2S15.5 4 14.3 4C11.8 4 10.2 5.5 10.2 8.2v2.6H7.5V14h2.7v8h3.3z" /></svg>
+)
+const WhatsAppIcon = () => (
+  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5z" /></svg>
+)
+
+const socialUrl = (value, base) => {
+  const v = (value || '').trim()
+  if (!v) return ''
+  return /^https?:\/\//i.test(v) ? v : `${base}${v.replace(/^@/, '').replace(/^\//, '')}`
+}
 
 export default function Footer() {
   const { shopName, settings } = useSettings()
@@ -17,11 +34,20 @@ export default function Footer() {
             <p className="text-sm text-green-300 leading-relaxed">
               {settings.tagline}
             </p>
-            <div className="flex gap-3 mt-4">
-              <a href="#" className="text-green-400 hover:text-white transition-colors"><Share2 className="w-5 h-5" /></a>
-              <a href="#" className="text-green-400 hover:text-white transition-colors"><Users className="w-5 h-5" /></a>
-              <a href="#" className="text-green-400 hover:text-white transition-colors"><MessageCircle className="w-5 h-5" /></a>
-            </div>
+            {(() => {
+              const links = [
+                { href: socialUrl(settings.instagram, 'https://instagram.com/'), icon: <InstagramIcon />, label: 'Instagram' },
+                { href: socialUrl(settings.facebook, 'https://facebook.com/'), icon: <FacebookIcon />, label: 'Facebook' },
+                { href: settings.whatsapp.replace(/\D/g, '') ? `https://wa.me/${settings.whatsapp.replace(/\D/g, '')}` : '', icon: <WhatsAppIcon />, label: 'WhatsApp' },
+              ].filter(l => l.href)
+              return links.length > 0 && (
+                <div className="flex gap-3 mt-4">
+                  {links.map(l => (
+                    <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer" aria-label={l.label} className="text-green-400 hover:text-white transition-colors">{l.icon}</a>
+                  ))}
+                </div>
+              )
+            })()}
           </div>
 
           {/* Quick Links */}

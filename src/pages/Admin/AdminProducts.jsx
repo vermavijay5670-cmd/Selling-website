@@ -277,6 +277,9 @@ export default function AdminProducts() {
                     <div className="flex items-center gap-3">
                       <img src={product.image} alt={product.name} className="w-9 h-9 rounded-lg object-cover shrink-0 bg-gray-100" />
                       <span className="font-medium text-gray-800">{product.name}</span>
+                      {product.image?.includes('unsplash.com') && (
+                        <span title="Placeholder stock photo. Click the pencil to replace it with your own." className="text-[10px] font-semibold text-orange-600 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded-full">stock photo</span>
+                      )}
                     </div>
                   </td>
                   <td className="px-4 py-3 text-gray-500 capitalize">{product.category}</td>

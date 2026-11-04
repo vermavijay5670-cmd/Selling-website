@@ -3,6 +3,8 @@ import { ShoppingCart, Plus, Minus } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import toast from 'react-hot-toast'
 
+const NO_PHOTO = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect width="300" height="300" fill="#f3f4f6"/><text x="150" y="160" font-size="48" text-anchor="middle">🌿</text></svg>')
+
 export default function ProductCard({ product }) {
   const { cart, addToCart, updateQuantity, setIsCartOpen } = useCart()
   const cartItem = cart.find(item => item.id === product.id)
@@ -31,6 +33,7 @@ export default function ProductCard({ product }) {
           alt={product.name}
           className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
+          onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = NO_PHOTO }}
         />
         {product.badge && (
           <span className={`absolute top-2 left-2 text-xs font-semibold px-2 py-0.5 rounded-full ${badgeColors[product.badge] || 'bg-gray-100 text-gray-700'}`}>

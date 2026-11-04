@@ -18,15 +18,11 @@ const whyUs = [
   { icon: <Shield className="w-7 h-7 text-green-600" />, title: 'Quality Assured', desc: 'Every item is carefully inspected for quality before being packed and sent to you.' },
 ]
 
-const testimonials = [
-  { name: 'Priya S.', city: 'Bengaluru', text: 'The freshest vegetables I have ever had delivered at home. The spices are aromatic and pure quality!', stars: 5 },
-  { name: 'Ramesh K.', city: 'Chennai', text: '{shop} has made my kitchen life so easy. Great prices and super fast delivery. Highly recommended!', stars: 5 },
-  { name: 'Anita M.', city: 'Hyderabad', text: 'Love the variety of spices available. The garam masala is simply outstanding. Will keep ordering!', stars: 5 },
-]
 
 export default function Home() {
   const { products } = useProducts()
-  const { shopName } = useSettings()
+  const { shopName, settings } = useSettings()
+  const testimonials = settings.testimonials || []
   const featuredProducts = products.slice(0, 8)
 
   return (
@@ -128,11 +124,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="bg-green-50 py-14">
+      {/* Testimonials (real reviews added by the admin; hidden when none) */}
+      {testimonials.length > 0 && <section className="bg-green-50 py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2 text-center">What Our Customers Say</h2>
-          <p className="text-gray-500 text-center mb-10">Loved by thousands of happy customers</p>
+          <div className="mb-10" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {testimonials.map((t, i) => (
               <div key={i} className="bg-white rounded-2xl p-6 shadow-sm">
@@ -141,21 +137,21 @@ export default function Home() {
                     <Star key={si} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                   ))}
                 </div>
-                <p className="text-gray-600 text-sm leading-relaxed mb-4">"{t.text.replace('{shop}', shopName)}"</p>
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">"{t.text}"</p>
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-sm">
                     {t.name[0]}
                   </div>
                   <div>
                     <p className="font-semibold text-sm text-gray-800">{t.name}</p>
-                    <p className="text-xs text-gray-400">{t.city}</p>
+                    {t.city && <p className="text-xs text-gray-400">{t.city}</p>}
                   </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </section>
+      </section>}
     </div>
   )
 }

@@ -8,6 +8,10 @@ export const DEFAULT_SETTINGS = {
   phone: '+91 98765 43210',
   email: 'hello@greenbasket.in',
   address: '123, Fresh Market Lane,\nBengaluru, Karnataka 560001',
+  instagram: '',
+  facebook: '',
+  whatsapp: '',
+  testimonials: [], // [{ name, city, text, stars }] - real reviews added by the admin
   tagline: 'Your trusted source for farm-fresh vegetables, herbs, and authentic spices delivered straight to your doorstep.',
 }
 const FIELDS = Object.keys(DEFAULT_SETTINGS)
