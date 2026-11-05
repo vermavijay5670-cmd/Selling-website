@@ -40,13 +40,13 @@ export default function TrackOrder() {
 
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Order ID</label>
-          <input value={orderId} onChange={e => setOrderId(e.target.value)} placeholder="e.g. 3F9A1C2B"
+          <label htmlFor="track-1" className="block text-sm font-medium text-gray-700 mb-1">Order ID</label>
+          <input id="track-1" value={orderId} onChange={e => setOrderId(e.target.value)} placeholder="e.g. 3F9A1C2B"
             className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm font-mono bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-400" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-          <input value={phone} onChange={e => setPhone(e.target.value)} type="tel" placeholder="9876543210"
+          <label htmlFor="track-2" className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+          <input id="track-2" value={phone} onChange={e => setPhone(e.target.value)} type="tel" placeholder="9876543210"
             className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-400" />
         </div>
         {error && <p className="text-red-500 text-sm">{error}</p>}

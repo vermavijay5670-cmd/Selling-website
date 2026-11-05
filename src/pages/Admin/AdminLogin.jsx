@@ -49,19 +49,19 @@ export default function AdminLogin() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
+            <label htmlFor="alogin-1" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input id="alogin-1"
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              placeholder="admin@greenbasket.in"
+              placeholder="admin@yourshop.com"
               required
               className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
+            <label htmlFor="alogin-2" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input id="alogin-2"
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}

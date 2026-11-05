@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { X, Plus, Minus, ShoppingBag, Trash2 } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { Link } from 'react-router-dom'
@@ -5,18 +6,27 @@ import { Link } from 'react-router-dom'
 export default function CartSidebar() {
   const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity, cartTotal } = useCart()
 
+  // Escape closes the cart
+  useEffect(() => {
+    if (!isCartOpen) return
+    const onKey = (e) => { if (e.key === 'Escape') setIsCartOpen(false) }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [isCartOpen, setIsCartOpen])
+
   if (!isCartOpen) return null
 
   return (
     <>
       {/* Backdrop */}
       <div
+        role="presentation"
         className="fixed inset-0 bg-black/50 z-40 transition-opacity"
         onClick={() => setIsCartOpen(false)}
       />
 
       {/* Sidebar */}
-      <div className="fixed right-0 top-0 h-full w-full max-w-sm bg-white z-50 flex flex-col shadow-2xl">
+      <div role="dialog" aria-modal="true" aria-label="Shopping cart" className="fixed right-0 top-0 h-full w-full max-w-sm bg-white z-50 flex flex-col shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b bg-green-600 text-white">
           <div className="flex items-center gap-2">
@@ -28,7 +38,7 @@ export default function CartSidebar() {
               </span>
             )}
           </div>
-          <button onClick={() => setIsCartOpen(false)} className="hover:bg-white/20 p-1 rounded-full transition-colors">
+          <button onClick={() => setIsCartOpen(false)} aria-label="Close cart" className="hover:bg-white/20 p-1 rounded-full transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -61,6 +71,7 @@ export default function CartSidebar() {
                 <div className="flex flex-col items-end justify-between">
                   <button
                     onClick={() => removeFromCart(item.id)}
+                    aria-label={`Remove ${item.name}`}
                     className="text-gray-300 hover:text-red-500 transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -68,6 +79,7 @@ export default function CartSidebar() {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      aria-label={`Decrease quantity of ${item.name}`}
                       className="w-6 h-6 rounded-full bg-green-100 hover:bg-green-200 flex items-center justify-center text-green-700 transition-colors"
                     >
                       <Minus className="w-3 h-3" />
@@ -75,6 +87,7 @@ export default function CartSidebar() {
                     <span className="w-5 text-center text-sm font-bold">{item.quantity}</span>
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      aria-label={`Increase quantity of ${item.name}`}
                       className="w-6 h-6 rounded-full bg-green-600 hover:bg-green-700 flex items-center justify-center text-white transition-colors"
                     >
                       <Plus className="w-3 h-3" />

@@ -119,7 +119,7 @@ export default function CustomerLogin() {
   }
 
   const eyeBtn = (
-    <button type="button" onClick={() => setShowPassword(p => !p)} className="text-gray-400 hover:text-gray-600">
+    <button type="button" onClick={() => setShowPassword(p => !p)} aria-label={showPassword ? 'Hide password' : 'Show password'} className="text-gray-400 hover:text-gray-600">
       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
     </button>
   )

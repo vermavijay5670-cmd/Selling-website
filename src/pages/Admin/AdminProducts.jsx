@@ -26,6 +26,12 @@ function ProductModal({ product, onClose, onSaved, nextId, categories }) {
 
   useEffect(() => () => { if (preview.startsWith('blob:')) URL.revokeObjectURL(preview) }, [preview])
 
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose])
+
   const set = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
 
   const pick = (e) => {
@@ -83,12 +89,12 @@ function ProductModal({ product, onClose, onSaved, nextId, categories }) {
   const label = 'block text-sm font-medium text-gray-700 mb-1'
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
-      <form onSubmit={handleSubmit} onClick={e => e.stopPropagation()}
+    <div role="presentation" className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4" onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
+      <form role="dialog" aria-modal="true" aria-label={isEdit ? 'Edit product' : 'Add product'} onSubmit={handleSubmit}
         className="bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl p-6 max-h-[92vh] overflow-y-auto space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-800">{isEdit ? 'Edit Product' : 'Add Product'}</h2>
-          <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+          <button type="button" onClick={onClose} aria-label="Close" className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
         </div>
 
         {/* Photo */}
@@ -115,27 +121,27 @@ function ProductModal({ product, onClose, onSaved, nextId, categories }) {
           </div>
         </div>
 
-        <div><label className={label}>Name <span className="text-red-500">*</span></label>
-          <input name="name" value={form.name} onChange={set} placeholder="e.g. Green Peas" className={input} /></div>
+        <div><label htmlFor="prod-1" className={label}>Name <span className="text-red-500">*</span></label>
+          <input id="prod-1" name="name" value={form.name} onChange={set} placeholder="e.g. Green Peas" className={input} /></div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div><label className={label}>Category</label>
-            <select name="category" value={form.category} onChange={set} className={input}>
+          <div><label htmlFor="prod-2" className={label}>Category</label>
+            <select id="prod-2" name="category" value={form.category} onChange={set} className={input}>
               {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
               {form.category && !categories.some(c => c.id === form.category) && <option value={form.category}>{form.category} (removed category)</option>}
             </select></div>
-          <div><label className={label}>Unit <span className="text-red-500">*</span></label>
-            <input name="unit" value={form.unit} onChange={set} placeholder="1 kg / 250g / 1 pc" className={input} /></div>
-          <div><label className={label}>Price (₹) <span className="text-red-500">*</span></label>
-            <input name="price" type="number" min="0" step="0.5" value={form.price} onChange={set} className={input} /></div>
-          <div><label className={label}>Stock</label>
-            <input name="stock" type="number" min="0" value={form.stock} onChange={set} className={input} /></div>
+          <div><label htmlFor="prod-3" className={label}>Unit <span className="text-red-500">*</span></label>
+            <input id="prod-3" name="unit" value={form.unit} onChange={set} placeholder="1 kg / 250g / 1 pc" className={input} /></div>
+          <div><label htmlFor="prod-4" className={label}>Price (₹) <span className="text-red-500">*</span></label>
+            <input id="prod-4" name="price" type="number" min="0" step="0.5" value={form.price} onChange={set} className={input} /></div>
+          <div><label htmlFor="prod-5" className={label}>Stock</label>
+            <input id="prod-5" name="stock" type="number" min="0" value={form.stock} onChange={set} className={input} /></div>
         </div>
 
-        <div><label className={label}>Badge (optional)</label>
-          <input name="badge" value={form.badge} onChange={set} placeholder="Fresh, Organic, Premium..." className={input} /></div>
-        <div><label className={label}>Description</label>
-          <textarea name="description" rows={3} value={form.description} onChange={set} className={input} /></div>
+        <div><label htmlFor="prod-6" className={label}>Badge (optional)</label>
+          <input id="prod-6" name="badge" value={form.badge} onChange={set} placeholder="Fresh, Organic, Premium..." className={input} /></div>
+        <div><label htmlFor="prod-7" className={label}>Description</label>
+          <textarea id="prod-7" name="description" rows={3} value={form.description} onChange={set} className={input} /></div>
 
         <button type="submit" disabled={saving}
           className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2">
@@ -153,6 +159,8 @@ export default function AdminProducts() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState({})
   const [modal, setModal] = useState(null) // null | 'new' | product
+  const [query, setQuery] = useState('')
+  const [catFilter, setCatFilter] = useState('all')
 
   useEffect(() => { fetchProducts() }, [])
 
@@ -169,6 +177,10 @@ export default function AdminProducts() {
     await fetchProducts()
     refreshShop() // update the customer-facing shop too
   }
+
+  const visibleProducts = productList.filter(p =>
+    (catFilter === 'all' || p.category === catFilter) &&
+    (!query.trim() || p.name.toLowerCase().includes(query.trim().toLowerCase())))
 
   const nextId = Math.max(0, ...productList.map(p => Number(p.id))) + 1
 
@@ -260,6 +272,21 @@ export default function AdminProducts() {
           </div>
         </div>
       ) : (
+        <>
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          <input
+            value={query} onChange={e => setQuery(e.target.value)}
+            placeholder="Search products by name" aria-label="Search products"
+            className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-sm bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400"
+          />
+          <select
+            value={catFilter} onChange={e => setCatFilter(e.target.value)} aria-label="Filter by category"
+            className="border border-gray-300 rounded-xl px-3 py-2.5 text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-400"
+          >
+            <option value="all">All categories</option>
+            {settings.categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+          </select>
+        </div>
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
           <table className="w-full text-sm min-w-[720px]">
             <thead>
@@ -273,7 +300,7 @@ export default function AdminProducts() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {productList.map(product => (
+              {visibleProducts.map(product => (
                 <tr key={product.id} className={`hover:bg-gray-50 transition-colors ${!product.active ? 'opacity-50' : ''}`}>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
@@ -287,12 +314,16 @@ export default function AdminProducts() {
                   <td className="px-4 py-3 text-gray-500">{settings.categories.find(c => c.id === product.category)?.name || product.category}</td>
                   <td className="px-4 py-3 text-green-700 font-semibold">₹{product.price}</td>
                   <td className="px-4 py-3">
-                    <input type="number" min="0" value={product.stock}
+                    {product.stock === 0
+                      ? <span className="block text-[10px] font-semibold text-red-600 mb-0.5">Out of stock</span>
+                      : product.stock <= 5 && <span className="block text-[10px] font-semibold text-orange-600 mb-0.5">Low stock</span>}
+                    <input type="number" min="0" value={product.stock} aria-label={`Stock for ${product.name}`}
                       onChange={e => handleStockChange(product.id, e.target.value)}
                       className="w-20 border border-gray-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-400" />
                   </td>
                   <td className="px-4 py-3">
-                    <button onClick={() => handleToggleActive(product.id)} className="transition-colors">
+                    <button onClick={() => handleToggleActive(product.id)} aria-pressed={!!product.active}
+                      aria-label={`${product.name}: ${product.active ? 'shown in shop, click to hide' : 'hidden, click to show'}`} className="transition-colors">
                       {product.active
                         ? <ToggleRight className="w-6 h-6 text-green-600" />
                         : <ToggleLeft className="w-6 h-6 text-gray-400" />}
@@ -314,7 +345,9 @@ export default function AdminProducts() {
               ))}
             </tbody>
           </table>
+          {visibleProducts.length === 0 && <p className="text-center text-gray-400 text-sm py-8">No products match your search.</p>}
         </div>
+        </>
       )}
 
       {modal && (

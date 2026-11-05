@@ -187,8 +187,10 @@ export default function CustomerOrders() {
                 <div key={order.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                   {/* Order Header - always visible */}
                   <div
+                    role="button" tabIndex={0} aria-expanded={isExpanded}
                     className="p-5 cursor-pointer hover:bg-gray-50 transition-colors"
                     onClick={() => setExpanded(isExpanded ? null : order.id)}
+                    onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) { e.preventDefault(); setExpanded(isExpanded ? null : order.id) } }}
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">

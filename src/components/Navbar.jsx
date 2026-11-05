@@ -53,6 +53,7 @@ export default function Navbar({ onSearch }) {
             {/* Cart Button */}
             <button
               onClick={() => setIsCartOpen(true)}
+              aria-label={`Open cart, ${cartCount} item${cartCount === 1 ? '' : 's'}`}
               className="relative flex items-center gap-1 bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-full transition-colors"
             >
               <ShoppingCart className="w-5 h-5" />
@@ -82,6 +83,8 @@ export default function Navbar({ onSearch }) {
 
             {/* Hamburger */}
             <button
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileOpen}
               className="md:hidden text-white p-1"
               onClick={() => setMobileOpen(prev => !prev)}
             >
@@ -93,7 +96,7 @@ export default function Navbar({ onSearch }) {
         {/* Mobile Menu */}
         {mobileOpen && (
           <div className="md:hidden pb-4 space-y-3">
-            <SearchBar onSearch={(q) => { onSearch && onSearch(q); setMobileOpen(false) }} />
+            <SearchBar onSearch={(q) => { if (onSearch) onSearch(q); setMobileOpen(false) }} />
             {navLinks.map(link => (
               <NavLink
                 key={link.to}

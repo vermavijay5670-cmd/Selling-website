@@ -131,13 +131,13 @@ function SettingsForm() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
           <h2 className="font-semibold text-gray-800">Shop</h2>
           <div>
-            <label className={label}>Shop Name</label>
-            <input name="shop_name" value={form.shop_name} onChange={set} maxLength={40} placeholder="e.g. Sharma Fresh Mart" className={input} />
+            <label htmlFor="set-1" className={label}>Shop Name</label>
+            <input id="set-1" name="shop_name" value={form.shop_name} onChange={set} maxLength={40} placeholder="e.g. Sharma Fresh Mart" className={input} />
             <p className="text-xs text-gray-400 mt-1">Shown in the header, footer, login pages, browser tab and admin panel.</p>
           </div>
           <div>
-            <label className={label}>Footer Description</label>
-            <textarea name="tagline" value={form.tagline} onChange={set} rows={3} maxLength={200} className={input} />
+            <label htmlFor="set-2" className={label}>Footer Description</label>
+            <textarea id="set-2" name="tagline" value={form.tagline} onChange={set} rows={3} maxLength={200} className={input} />
           </div>
           <div>
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Preview</p>
@@ -151,17 +151,17 @@ function SettingsForm() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
           <h2 className="font-semibold text-gray-800">Home Page Banner</h2>
           <div>
-            <label className={label}>Small badge text</label>
-            <input name="hero_badge" value={form.hero_badge} onChange={set} maxLength={40} className={input} />
+            <label htmlFor="set-3" className={label}>Small badge text</label>
+            <input id="set-3" name="hero_badge" value={form.hero_badge} onChange={set} maxLength={40} className={input} />
           </div>
           <div>
-            <label className={label}>Headline</label>
-            <textarea name="hero_title" value={form.hero_title} onChange={set} rows={2} maxLength={80} className={input} />
+            <label htmlFor="set-4" className={label}>Headline</label>
+            <textarea id="set-4" name="hero_title" value={form.hero_title} onChange={set} rows={2} maxLength={80} className={input} />
             <p className="text-xs text-gray-400 mt-1">Press Enter for a second line, which is shown in a lighter colour.</p>
           </div>
           <div>
-            <label className={label}>Description</label>
-            <textarea name="hero_subtitle" value={form.hero_subtitle} onChange={set} rows={3} maxLength={200} className={input} />
+            <label htmlFor="set-5" className={label}>Description</label>
+            <textarea id="set-5" name="hero_subtitle" value={form.hero_subtitle} onChange={set} rows={3} maxLength={200} className={input} />
           </div>
         </div>
 
@@ -196,17 +196,17 @@ function SettingsForm() {
           <h2 className="font-semibold text-gray-800">Contact Details <span className="text-xs font-normal text-gray-400">(shown in the website footer; leave blank to hide)</span></h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className={label}>Phone</label>
-              <input name="phone" type="tel" value={form.phone} onChange={set} placeholder="+91 98765 43210" className={input} />
+              <label htmlFor="set-6" className={label}>Phone</label>
+              <input id="set-6" name="phone" type="tel" value={form.phone} onChange={set} placeholder="+91 98765 43210" className={input} />
             </div>
             <div>
-              <label className={label}>Email</label>
-              <input name="email" type="email" value={form.email} onChange={set} placeholder="hello@yourshop.in" className={input} />
+              <label htmlFor="set-7" className={label}>Email</label>
+              <input id="set-7" name="email" type="email" value={form.email} onChange={set} placeholder="hello@yourshop.in" className={input} />
             </div>
           </div>
           <div>
-            <label className={label}>Address</label>
-            <textarea name="address" value={form.address} onChange={set} rows={3} placeholder={'Shop no., Street,\nCity, State PIN'} className={input} />
+            <label htmlFor="set-8" className={label}>Address</label>
+            <textarea id="set-8" name="address" value={form.address} onChange={set} rows={3} placeholder={'Shop no., Street,\nCity, State PIN'} className={input} />
           </div>
         </div>
 
@@ -214,17 +214,17 @@ function SettingsForm() {
           <h2 className="font-semibold text-gray-800">Social Links <span className="text-xs font-normal text-gray-400">(an icon appears in the footer only for the ones you fill in)</span></h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className={label}>Instagram</label>
-              <input name="instagram" value={form.instagram} onChange={set} placeholder="@yourshop or full link" className={input} />
+              <label htmlFor="set-9" className={label}>Instagram</label>
+              <input id="set-9" name="instagram" value={form.instagram} onChange={set} placeholder="@yourshop or full link" className={input} />
             </div>
             <div>
-              <label className={label}>Facebook</label>
-              <input name="facebook" value={form.facebook} onChange={set} placeholder="page name or full link" className={input} />
+              <label htmlFor="set-10" className={label}>Facebook</label>
+              <input id="set-10" name="facebook" value={form.facebook} onChange={set} placeholder="page name or full link" className={input} />
             </div>
           </div>
           <div>
-            <label className={label}>WhatsApp number</label>
-            <input name="whatsapp" type="tel" value={form.whatsapp} onChange={set} placeholder="919876543210 (with country code)" className={input} />
+            <label htmlFor="set-11" className={label}>WhatsApp number</label>
+            <input id="set-11" name="whatsapp" type="tel" value={form.whatsapp} onChange={set} placeholder="919876543210 (with country code)" className={input} />
           </div>
         </div>
 

@@ -28,7 +28,7 @@ export default function SearchBar({ onSearch, value, onChange }) {
         className="w-full pl-9 pr-8 py-2 text-sm rounded-full border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-green-400 transition"
       />
       {query && (
-        <button onClick={clear} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+        <button onClick={clear} aria-label="Clear search" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
           <X className="w-3.5 h-3.5" />
         </button>
       )}

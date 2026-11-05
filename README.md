@@ -32,6 +32,8 @@ Also run `supabase-migration-customer-cancel.sql` (lets customers cancel their o
 
 Shop Settings also controls the home page banner text and the product categories (general-grocery defaults are built in). Re-run `supabase-migration-settings.sql` after updating.
 
+Run `npm test` before deploying changes. More in `tests/README.md`.
+
 ### Setup (once)
 1. Supabase SQL Editor: run `supabase-schema.sql`, then `supabase-migration-customer-auth.sql`.
 2. Create your admin user in Supabase -> Authentication -> Users, then run:

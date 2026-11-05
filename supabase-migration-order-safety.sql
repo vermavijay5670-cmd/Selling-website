@@ -46,8 +46,11 @@ BEGIN
     IF r.name IS NULL OR r.active IS NOT TRUE THEN
       RAISE EXCEPTION 'A product in your cart is no longer available';
     END IF;
-    IF r.qty < 1 OR r.qty > 100 THEN
+    IF r.qty < 1 THEN
       RAISE EXCEPTION 'Invalid quantity for %', r.name;
+    END IF;
+    IF r.qty > 100 THEN
+      RAISE EXCEPTION 'You can order at most 100 of % at a time. Please call the shop for bulk orders.', r.name;
     END IF;
 
     UPDATE products SET stock = stock - r.qty, updated_at = now()

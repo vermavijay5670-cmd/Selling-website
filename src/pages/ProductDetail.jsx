@@ -68,6 +68,7 @@ export default function ProductDetail() {
           ) : cartItem ? (
             <div className="flex items-center gap-3">
               <button
+                aria-label={`Decrease quantity of ${product.name}`}
                 onClick={() => updateQuantity(product.id, cartItem.quantity - 1)}
                 className="w-10 h-10 rounded-full bg-green-100 hover:bg-green-200 flex items-center justify-center text-green-700 transition-colors"
               >
@@ -75,6 +76,7 @@ export default function ProductDetail() {
               </button>
               <span className="text-xl font-bold w-8 text-center">{cartItem.quantity}</span>
               <button
+                aria-label={`Increase quantity of ${product.name}`}
                 onClick={() => updateQuantity(product.id, cartItem.quantity + 1)}
                 className="w-10 h-10 rounded-full bg-green-600 hover:bg-green-700 flex items-center justify-center text-white transition-colors"
               >

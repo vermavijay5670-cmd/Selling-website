@@ -55,7 +55,7 @@ td,th{padding:4px 0;border-bottom:1px dashed #bbb;text-align:left}.r{text-align:
 <h2>Items</h2><table><tr><th>Item</th><th>Unit</th><th class="r">Qty</th><th class="r">Rs</th></tr>${rows}
 <tr class="tot"><td colspan="3">Total (Cash on Delivery)</td><td class="r">${Number(order.total).toFixed(2)}</td></tr></table>
 ${order.notes ? '<h2>Notes</h2><div>' + esc(order.notes) + '</div>' : ''}
-<script>window.onload=function(){window.print()}<\/script></body></html>`)
+<script>window.onload=function(){window.print()}</script></body></html>`)
   w.document.close()
 }
 const FILTERS = ['all', ...STATUS_OPTIONS]
@@ -187,7 +187,12 @@ export default function AdminOrders() {
           {orders.map(order => (
             <div key={order.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               {/* Row */}
-              <div className="flex flex-wrap items-center gap-4 p-4 cursor-pointer" onClick={() => toggleExpand(order.id)}>
+              <div
+                role="button" tabIndex={0} aria-expanded={expanded === order.id}
+                className="flex flex-wrap items-center gap-4 p-4 cursor-pointer"
+                onClick={() => toggleExpand(order.id)}
+                onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) { e.preventDefault(); toggleExpand(order.id) } }}
+              >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-mono text-xs text-gray-400">{String(order.id).slice(0, 8)}...</span>

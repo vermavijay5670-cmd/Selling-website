@@ -19,9 +19,9 @@ DROP POLICY IF EXISTS "Admin can update settings" ON shop_settings;
 CREATE POLICY "Admin can update settings" ON shop_settings FOR UPDATE USING (public.is_admin());
 
 -- Contact details + footer tagline (added later; safe to re-run)
-ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS phone TEXT NOT NULL DEFAULT '+91 98765 43210';
-ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS email TEXT NOT NULL DEFAULT 'hello@greenbasket.in';
-ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS address TEXT NOT NULL DEFAULT E'123, Fresh Market Lane,\nBengaluru, Karnataka 560001';
+ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS phone TEXT NOT NULL DEFAULT '';
+ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS email TEXT NOT NULL DEFAULT '';
+ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS address TEXT NOT NULL DEFAULT '';
 ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS tagline TEXT NOT NULL DEFAULT 'Your trusted source for farm-fresh vegetables, herbs, and authentic spices delivered straight to your doorstep.';
 
 -- Social links + customer reviews (added later; safe to re-run)
@@ -40,3 +40,12 @@ ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS hero_subtitle TEXT NOT NULL D
 UPDATE shop_settings
 SET tagline = 'Your neighbourhood grocery store: everyday essentials, fresh produce and quality staples delivered to your doorstep.'
 WHERE tagline = 'Your trusted source for farm-fresh vegetables, herbs, and authentic spices delivered straight to your doorstep.';
+
+-- Remove the made-up sample contact details from shops that never entered their own
+-- (the footer hides empty fields; fill in the real ones under Admin -> Shop Settings)
+ALTER TABLE shop_settings ALTER COLUMN phone SET DEFAULT '';
+ALTER TABLE shop_settings ALTER COLUMN email SET DEFAULT '';
+ALTER TABLE shop_settings ALTER COLUMN address SET DEFAULT '';
+UPDATE shop_settings SET phone = ''   WHERE phone = '+91 98765 43210';
+UPDATE shop_settings SET email = ''   WHERE email = 'hello@greenbasket.in';
+UPDATE shop_settings SET address = '' WHERE address = E'123, Fresh Market Lane,\nBengaluru, Karnataka 560001';

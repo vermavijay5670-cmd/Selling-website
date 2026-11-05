@@ -55,12 +55,12 @@ export default function ResetPassword() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Min 6 characters" className={input} />
+              <label htmlFor="reset-1" className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+              <input id="reset-1" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Min 6 characters" className={input} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-              <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} className={input} />
+              <label htmlFor="reset-2" className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+              <input id="reset-2" type="password" value={confirm} onChange={e => setConfirm(e.target.value)} className={input} />
             </div>
             <button type="submit" disabled={loading}
               className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2">

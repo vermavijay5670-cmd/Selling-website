@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react'
 import toast from 'react-hot-toast'
 import { useProducts } from './ProductsContext'
+import { useCustomerAuth } from './CustomerAuthContext'
 
 const CartContext = createContext()
 
 export function CartProvider({ children }) {
   const { products, live } = useProducts()
+  const { customer } = useCustomerAuth()
   const [cart, setCart] = useState(() => {
     try {
       const saved = localStorage.getItem('greenbasket-cart')
@@ -21,6 +23,13 @@ export function CartProvider({ children }) {
     cartRef.current = cart
     localStorage.setItem('greenbasket-cart', JSON.stringify(cart))
   }, [cart])
+
+  // Logging out empties the cart, so the next person on a shared phone doesn't see it
+  const wasLoggedIn = useRef(false)
+  useEffect(() => {
+    if (customer) wasLoggedIn.current = true
+    else if (wasLoggedIn.current) { wasLoggedIn.current = false; setCart([]) }
+  }, [customer])
 
   // Keep the saved cart in line with the live shop: refresh prices, drop products that were
   // removed or sold out, and cap quantities at the available stock.

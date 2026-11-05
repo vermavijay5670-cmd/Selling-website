@@ -1,12 +1,12 @@
 import { Link } from 'react-router-dom'
-import { ShoppingCart, Plus, Minus } from 'lucide-react'
+import { Plus, Minus } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import toast from 'react-hot-toast'
 
 const NO_PHOTO = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect width="300" height="300" fill="#f3f4f6"/><text x="150" y="160" font-size="48" text-anchor="middle">🌿</text></svg>')
 
 export default function ProductCard({ product }) {
-  const { cart, addToCart, updateQuantity, setIsCartOpen } = useCart()
+  const { cart, addToCart, updateQuantity } = useCart()
   const cartItem = cart.find(item => item.id === product.id)
   const inCart = !!cartItem
   const outOfStock = product.stock === 0
@@ -68,6 +68,7 @@ export default function ProductCard({ product }) {
           ) : inCart ? (
             <div className="flex items-center gap-1">
               <button
+                aria-label={`Decrease quantity of ${product.name}`}
                 onClick={() => updateQuantity(product.id, cartItem.quantity - 1)}
                 className="w-7 h-7 rounded-full bg-green-100 hover:bg-green-200 flex items-center justify-center text-green-700 transition-colors"
               >
@@ -75,6 +76,7 @@ export default function ProductCard({ product }) {
               </button>
               <span className="w-6 text-center text-sm font-bold text-gray-700">{cartItem.quantity}</span>
               <button
+                aria-label={`Increase quantity of ${product.name}`}
                 onClick={() => updateQuantity(product.id, cartItem.quantity + 1)}
                 className="w-7 h-7 rounded-full bg-green-600 hover:bg-green-700 flex items-center justify-center text-white transition-colors"
               >

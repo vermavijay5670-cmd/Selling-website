@@ -19,6 +19,8 @@ const socialUrl = (value, base) => {
   return /^https?:\/\//i.test(v) ? v : `${base}${v.replace(/^@/, '').replace(/^\//, '')}`
 }
 
+const YEAR = new Date().getFullYear()
+
 export default function Footer() {
   const { shopName, settings } = useSettings()
   return (
@@ -88,7 +90,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-green-800 mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-green-400">
-          <span>© {new Date().getFullYear()} {shopName}. All rights reserved.</span>
+          <span>© {YEAR} {shopName}. All rights reserved.</span>
           <span>Powered by <span className="text-green-300 font-medium">{shopName}</span> 🌿</span>
         </div>
       </div>
