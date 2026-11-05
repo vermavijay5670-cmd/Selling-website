@@ -19,8 +19,11 @@ Deno.serve(async (req) => {
   if (!token || !chatId) return new Response('Telegram secrets missing', { status: 500 })
 
   let order: Record<string, any>
+  let cancelled = false
   try {
-    order = (await req.json()).record
+    const body = await req.json()
+    cancelled = body.type === 'cancelled'
+    order = cancelled ? body.order : body.record
     if (!order?.id) throw new Error('no record')
   } catch {
     return new Response('Bad request', { status: 400 })
@@ -30,7 +33,14 @@ Deno.serve(async (req) => {
     .map((i: any) => `  • ${esc(i.name)} x${esc(i.quantity)} = ₹${(Number(i.price) * Number(i.quantity)).toFixed(2)}`)
     .join('\n')
 
-  const text =
+  const text = cancelled
+    ? `❌ <b>Order Cancelled by Customer #${esc(String(order.id).slice(0, 8).toUpperCase())}</b>\n\n` +
+      `👤 <b>Customer:</b> ${esc(order.customer_name)}\n` +
+      `📞 <b>Phone:</b> ${esc(order.phone)}\n\n` +
+      `🧾 <b>Items:</b>\n${items}\n\n` +
+      `💰 <b>Total: ₹${Number(order.total).toFixed(2)}</b>\n` +
+      `ℹ️ Do not dispatch this order.`
+    :
     `🛒 <b>New Order #${esc(String(order.id).slice(0, 8).toUpperCase())}</b>\n\n` +
     `👤 <b>Customer:</b> ${esc(order.customer_name)}\n` +
     `📞 <b>Phone:</b> ${esc(order.phone)}\n` +

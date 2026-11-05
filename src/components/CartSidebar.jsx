@@ -40,7 +40,7 @@ export default function CartSidebar() {
               <span className="text-6xl">🛒</span>
               <div>
                 <p className="font-semibold text-gray-700 text-lg">Your cart is empty</p>
-                <p className="text-sm text-gray-400 mt-1">Add some fresh veggies or spices!</p>
+                <p className="text-sm text-gray-400 mt-1">Add some groceries to get started!</p>
               </div>
               <button
                 onClick={() => setIsCartOpen(false)}

@@ -56,6 +56,31 @@ export default function Checkout() {
   // make sure cart prices/stock are current before the customer pays
   useEffect(() => { refreshProducts() }, [refreshProducts])
 
+  // Prefill phone/address from the customer's previous order (only fields they haven't typed)
+  useEffect(() => {
+    if (!customer) return
+    let active = true
+    supabase.from('orders')
+      .select('customer_name, phone, address, city, pincode, landmark')
+      .eq('user_id', customer.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .then(({ data }) => {
+        const last = data?.[0]
+        if (!last || !active) return
+        setForm(prev => ({
+          ...prev,
+          fullName: prev.fullName || last.customer_name || '',
+          phone: prev.phone || last.phone || '',
+          address: prev.address || last.address || '',
+          city: prev.city || last.city || '',
+          pincode: prev.pincode || last.pincode || '',
+          landmark: prev.landmark || last.landmark || '',
+        }))
+      })
+    return () => { active = false }
+  }, [customer])
+
   // Prefill name/email for logged-in customers
   useEffect(() => {
     if (!customer) return

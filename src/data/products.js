@@ -1,13 +1,3 @@
-export const categories = [
-  { id: 'all', name: 'All', icon: '🛒' },
-  { id: 'vegetables', name: 'Vegetables', icon: '🥕' },
-  { id: 'leafy', name: 'Leafy Greens', icon: '🥬' },
-  { id: 'fruits', name: 'Fruits', icon: '🍅' },
-  { id: 'whole-spices', name: 'Whole Spices', icon: '🌶️' },
-  { id: 'ground-spices', name: 'Ground Spices', icon: '🫙' },
-  { id: 'herbs', name: 'Herbs', icon: '🌿' },
-]
-
 export const products = [
   { id: 1, name: 'Fresh Tomatoes', category: 'vegetables', price: 40, unit: '1 kg', stock: 50, image: 'https://images.unsplash.com/photo-1546470427-e26264be0b11?w=300&q=80', description: 'Farm-fresh red tomatoes, perfect for cooking and salads.', badge: 'Fresh' },
   { id: 2, name: 'Carrots', category: 'vegetables', price: 35, unit: '500g', stock: 40, image: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=300&q=80', description: 'Crunchy and sweet carrots, rich in beta-carotene.', badge: 'Organic' },

@@ -1,17 +1,11 @@
-import { useLocation, Link } from 'react-router-dom'
+import { useLocation, Link, Navigate } from 'react-router-dom'
 import { CheckCircle2 } from 'lucide-react'
 
 export default function OrderConfirmation() {
   const { state } = useLocation()
 
-  if (!state) {
-    return (
-      <div className="max-w-xl mx-auto px-4 py-16 text-center">
-        <p className="text-gray-500">No order data found.</p>
-        <Link to="/" className="mt-4 inline-block text-green-600 hover:underline">Go Home</Link>
-      </div>
-    )
-  }
+  // refreshed or opened directly: the order itself is safe, just send them to their orders
+  if (!state) return <Navigate to="/my-orders" replace />
 
   const { orderId, customerName, phone, total, items } = state
   const shortId = String(orderId).slice(0, 8).toUpperCase()

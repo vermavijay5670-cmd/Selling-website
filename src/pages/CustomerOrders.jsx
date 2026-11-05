@@ -4,6 +4,8 @@ import { useCustomerAuth } from '../context/CustomerAuthContext'
 import { useSettings } from '../context/SettingsContext'
 import { supabase } from '../lib/supabase'
 import toast from 'react-hot-toast'
+import { useCart } from '../context/CartContext'
+import { useProducts } from '../context/ProductsContext'
 import OrderTimeline, { STATUS_INFO } from '../components/OrderTimeline'
 import { Leaf, Package, LogOut, ShoppingBag, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
 
@@ -11,6 +13,8 @@ export default function CustomerOrders() {
   const { customer, signOut, customerLoading } = useCustomerAuth()
   const { shopName, settings } = useSettings()
   const [cancelling, setCancelling] = useState(null)
+  const { addItems, setIsCartOpen } = useCart()
+  const { products } = useProducts()
   const navigate = useNavigate()
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
@@ -68,6 +72,22 @@ export default function CustomerOrders() {
     } finally {
       setCancelling(null)
     }
+  }
+
+  // put the items of an old order back in the cart at today's prices / stock
+  const handleReorder = (order) => {
+    const lines = (Array.isArray(order.items) ? order.items : []).map(item => ({
+      product: products.find(p => p.id === item.id),
+      quantity: item.quantity,
+    }))
+    const known = lines.filter(l => l.product)
+    const notSold = lines.length - known.length
+    if (!known.some(l => l.product.stock > 0)) { toast.error('These items are not available right now'); return }
+    const skipped = addItems(known)
+    const notes = [...(notSold ? [`${notSold} no longer sold`] : []), ...skipped]
+    if (notes.length) toast(`Added to cart. Not fully available: ${notes.join(', ')}`, { duration: 6000 })
+    else toast.success('Items added to your cart')
+    setIsCartOpen(true)
   }
 
   const handleLogout = async () => {
@@ -256,6 +276,12 @@ export default function CustomerOrders() {
                         </div>
                       </div>
 
+                      <div className="px-5 pb-4">
+                        <button onClick={() => handleReorder(order)}
+                          className="text-sm font-medium text-green-700 border border-green-200 hover:bg-green-50 px-4 py-2 rounded-xl transition-colors">
+                          🔁 Order Again
+                        </button>
+                      </div>
                       {order.status === 'pending' && (
                         <div className="px-5 pb-5 flex flex-wrap items-center gap-3">
                           <button

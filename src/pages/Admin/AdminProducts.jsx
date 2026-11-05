@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase, supabaseConfigured } from '../../lib/supabase'
 import { resizeImage } from '../../lib/image'
-import { products as localProducts, categories } from '../../data/products'
+import { products as localProducts } from '../../data/products'
+import { useSettings } from '../../context/SettingsContext'
 import { useProducts } from '../../context/ProductsContext'
 import toast from 'react-hot-toast'
 import {
@@ -11,13 +12,12 @@ import {
 } from 'lucide-react'
 
 const BUCKET = 'product-images'
-const CATEGORY_OPTIONS = categories.filter(c => c.id !== 'all')
-const EMPTY = { name: '', category: 'vegetables', price: '', unit: '', stock: '', badge: '', description: '', image: '' }
+const EMPTY = { name: '', category: '', price: '', unit: '', stock: '', badge: '', description: '', image: '' }
 
 // Defined outside AdminProducts so inputs never lose focus while typing
-function ProductModal({ product, onClose, onSaved, nextId }) {
+function ProductModal({ product, onClose, onSaved, nextId, categories }) {
   const isEdit = !!product
-  const [form, setForm] = useState(product ? { ...EMPTY, ...product, badge: product.badge || '', description: product.description || '' } : EMPTY)
+  const [form, setForm] = useState(product ? { ...EMPTY, ...product, badge: product.badge || '', description: product.description || '' } : { ...EMPTY, category: categories[0]?.id || '' })
   const [file, setFile] = useState(null)       // newly picked image (Blob/File)
   const [preview, setPreview] = useState(product?.image || '')
   const [saving, setSaving] = useState(false)
@@ -121,7 +121,8 @@ function ProductModal({ product, onClose, onSaved, nextId }) {
         <div className="grid grid-cols-2 gap-3">
           <div><label className={label}>Category</label>
             <select name="category" value={form.category} onChange={set} className={input}>
-              {CATEGORY_OPTIONS.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+              {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+              {form.category && !categories.some(c => c.id === form.category) && <option value={form.category}>{form.category} (removed category)</option>}
             </select></div>
           <div><label className={label}>Unit <span className="text-red-500">*</span></label>
             <input name="unit" value={form.unit} onChange={set} placeholder="1 kg / 250g / 1 pc" className={input} /></div>
@@ -147,6 +148,7 @@ function ProductModal({ product, onClose, onSaved, nextId }) {
 
 export default function AdminProducts() {
   const { refresh: refreshShop } = useProducts()
+  const { settings } = useSettings()
   const [productList, setProductList] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState({})
@@ -250,7 +252,7 @@ export default function AdminProducts() {
           <p className="text-gray-400 text-sm mb-5">Until you add some, the shop shows its built-in list.</p>
           <div className="flex justify-center gap-3">
             <button onClick={importDefaults} className="border border-green-600 text-green-700 hover:bg-green-50 text-sm font-semibold px-4 py-2 rounded-xl">
-              Import the {localProducts.length} default products
+              Import {localProducts.length} sample products
             </button>
             <button onClick={() => setModal('new')} className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-xl">
               Add my first product
@@ -282,7 +284,7 @@ export default function AdminProducts() {
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-500 capitalize">{product.category}</td>
+                  <td className="px-4 py-3 text-gray-500">{settings.categories.find(c => c.id === product.category)?.name || product.category}</td>
                   <td className="px-4 py-3 text-green-700 font-semibold">₹{product.price}</td>
                   <td className="px-4 py-3">
                     <input type="number" min="0" value={product.stock}
@@ -319,6 +321,7 @@ export default function AdminProducts() {
         <ProductModal
           product={modal === 'new' ? null : modal}
           nextId={nextId}
+          categories={settings.categories}
           onClose={() => setModal(null)}
           onSaved={afterChange}
         />

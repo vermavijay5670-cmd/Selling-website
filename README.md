@@ -30,6 +30,8 @@ Also run `supabase-migration-admin-orders.sql` (dashboard stats + order list ind
 
 Also run `supabase-migration-customer-cancel.sql` (lets customers cancel their own pending orders).
 
+Shop Settings also controls the home page banner text and the product categories (general-grocery defaults are built in). Re-run `supabase-migration-settings.sql` after updating.
+
 ### Setup (once)
 1. Supabase SQL Editor: run `supabase-schema.sql`, then `supabase-migration-customer-auth.sql`.
 2. Create your admin user in Supabase -> Authentication -> Users, then run:
@@ -43,5 +45,5 @@ The bot token is NOT in the website. It lives in a Supabase Edge Function.
 1. Supabase -> Edge Functions -> Deploy a new function -> Via Editor. Name: `notify-order`. Paste `supabase/functions/notify-order/index.ts`, deploy.
 2. Open the function -> Details -> turn OFF "Enforce JWT Verification" (the database trigger calls it with its own secret header).
 3. Edge Functions -> Secrets: add `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `WEBHOOK_SECRET` (any long random string).
-4. Edit `supabase-migration-telegram.sql` (project ref + the same secret) and run it in the SQL Editor.
+4. Edit `supabase-migration-telegram.sql` (the project ref and the same secret, one time each, in the INSERT near the top) and run it in the SQL Editor. It sends alerts for new orders and for customer cancellations. After updating the function code, paste it into the Edge Function again and redeploy.
 5. Delete the old `VITE_TELEGRAM_*` variables from `.env` and Vercel.

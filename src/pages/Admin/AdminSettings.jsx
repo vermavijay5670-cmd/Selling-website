@@ -1,22 +1,76 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useSettings } from '../../context/SettingsContext'
+import { supabase } from '../../lib/supabase'
 import toast from 'react-hot-toast'
-import { ArrowLeft, ExternalLink, Leaf, Loader2, Plus, Trash2, Star } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Leaf, Loader2, Plus, Trash2, Star, ChevronUp, ChevronDown } from 'lucide-react'
 
 // trim every text field so "changed?" ignores stray spaces
 const normalize = (v) => Object.fromEntries(Object.entries(v).map(([k, x]) =>
   [k, k === 'testimonials'
     ? (x || []).map(t => ({ name: (t.name || '').trim(), city: (t.city || '').trim(), text: (t.text || '').trim(), stars: Number(t.stars) || 5 }))
+    : k === 'categories'
+    ? (x || []).map(c => ({ id: c.id || '', name: (c.name || '').trim(), icon: (c.icon || '').trim() }))
     : (x ?? '').trim()]))
+
+// "Rice & Atta" -> "rice-and-atta"; unique among the ids already taken
+const makeId = (name, taken) => {
+  const base = name.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'category'
+  let id = base, n = 2
+  while (taken.has(id) || id === 'all') id = `${base}-${n++}`
+  return id
+}
 
 const input = 'w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400'
 const label = 'block text-sm font-medium text-gray-700 mb-1'
 
+// Wait for the real saved values before showing the form; otherwise the form would start
+// from defaults and "Save" could overwrite the shop's real settings.
 export default function AdminSettings() {
+  const { status } = useSettings()
+  if (status === 'ready') return <SettingsForm />
+  return (
+    <div className="max-w-2xl mx-auto px-4 py-16 text-center">
+      {status === 'loading'
+        ? <p className="text-gray-400">Loading settings...</p>
+        : <>
+            <p className="text-gray-700 font-medium mb-1">Couldn't load the current settings.</p>
+            <p className="text-sm text-gray-500 mb-4">Make sure you've run <code>supabase-migration-settings.sql</code>, then refresh this page.</p>
+            <Link to="/admin/dashboard" className="text-green-600 hover:underline text-sm">← Back to dashboard</Link>
+          </>}
+    </div>
+  )
+}
+
+function SettingsForm() {
   const { settings, updateSettings } = useSettings()
   const [form, setForm] = useState(settings)
   const [saving, setSaving] = useState(false)
+
+  // how many products use each category (a category with products can't be removed)
+  const [usage, setUsage] = useState({})
+  useEffect(() => {
+    supabase.from('products').select('category').then(({ data }) => {
+      const counts = {}
+      ;(data || []).forEach(p => { counts[p.category] = (counts[p.category] || 0) + 1 })
+      setUsage(counts)
+    })
+  }, [])
+
+  const setCategory = (i, key, value) =>
+    setForm(prev => ({ ...prev, categories: prev.categories.map((c, idx) => idx === i ? { ...c, [key]: value } : c) }))
+  const addCategory = () =>
+    setForm(prev => ({ ...prev, categories: [...prev.categories, { id: '', name: '', icon: '🛒' }] }))
+  const removeCategory = (i) =>
+    setForm(prev => ({ ...prev, categories: prev.categories.filter((_, idx) => idx !== i) }))
+  const moveCategory = (i, dir) =>
+    setForm(prev => {
+      const list = [...prev.categories]
+      const j = i + dir
+      if (j < 0 || j >= list.length) return prev
+      ;[list[i], list[j]] = [list[j], list[i]]
+      return { ...prev, categories: list }
+    })
 
   const set = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
 
@@ -36,6 +90,18 @@ export default function AdminSettings() {
     if (clean.phone && !/^[+\d][\d\s()-]{6,19}$/.test(clean.phone)) return toast.error('Enter a valid phone number')
     if (clean.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean.email)) return toast.error('Enter a valid email address')
     if (clean.whatsapp && clean.whatsapp.replace(/\D/g, '').length < 10) return toast.error('Enter the WhatsApp number with country code, e.g. 919876543210')
+    if (clean.categories.length === 0) return toast.error('Keep at least one category')
+    if (clean.categories.some(c => !c.name)) return toast.error('Every category needs a name (or remove the empty one)')
+    const names = clean.categories.map(c => c.name.toLowerCase())
+    if (new Set(names).size !== names.length) return toast.error('Two categories have the same name')
+    // give new categories a permanent id
+    const taken = new Set(clean.categories.map(c => c.id).filter(Boolean))
+    clean.categories = clean.categories.map(c => {
+      if (c.id) return c
+      const id = makeId(c.name, taken)
+      taken.add(id)
+      return { ...c, id, icon: c.icon || '🛒' }
+    })
     if (clean.testimonials.some(t => !t.name || !t.text)) return toast.error('Each review needs a name and text (or remove the empty one)')
     setSaving(true)
     try {
@@ -80,6 +146,50 @@ export default function AdminSettings() {
               <span className="tracking-tight truncate">{form.shop_name.trim() || '—'}</span>
             </div>
           </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
+          <h2 className="font-semibold text-gray-800">Home Page Banner</h2>
+          <div>
+            <label className={label}>Small badge text</label>
+            <input name="hero_badge" value={form.hero_badge} onChange={set} maxLength={40} className={input} />
+          </div>
+          <div>
+            <label className={label}>Headline</label>
+            <textarea name="hero_title" value={form.hero_title} onChange={set} rows={2} maxLength={80} className={input} />
+            <p className="text-xs text-gray-400 mt-1">Press Enter for a second line, which is shown in a lighter colour.</p>
+          </div>
+          <div>
+            <label className={label}>Description</label>
+            <textarea name="hero_subtitle" value={form.hero_subtitle} onChange={set} rows={3} maxLength={200} className={input} />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+          <div className="flex items-start justify-between gap-3">
+            <h2 className="font-semibold text-gray-800">Product Categories <span className="block sm:inline text-xs font-normal text-gray-400">(shown on the home page and as filters in the shop)</span></h2>
+            {form.categories.length < 20 && (
+              <button type="button" onClick={addCategory} className="shrink-0 flex items-center gap-1 text-sm font-medium text-green-700 hover:bg-green-50 px-3 py-1.5 rounded-lg">
+                <Plus className="w-4 h-4" /> Add
+              </button>
+            )}
+          </div>
+          {form.categories.map((c, i) => {
+            const count = c.id ? usage[c.id] || 0 : 0
+            return (
+              <div key={c.id || `new-${i}`} className="flex items-center gap-2">
+                <input value={c.icon} onChange={e => setCategory(i, 'icon', e.target.value)} maxLength={4} aria-label="Icon (emoji)" className={`${input} !w-14 text-center text-lg`} />
+                <input value={c.name} onChange={e => setCategory(i, 'name', e.target.value)} maxLength={30} placeholder="Category name" aria-label="Category name" className={input} />
+                <span className="hidden sm:block text-xs text-gray-400 w-20 shrink-0">{count > 0 ? `${count} product${count === 1 ? '' : 's'}` : ''}</span>
+                <button type="button" onClick={() => moveCategory(i, -1)} disabled={i === 0} aria-label="Move up" className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30"><ChevronUp className="w-4 h-4" /></button>
+                <button type="button" onClick={() => moveCategory(i, 1)} disabled={i === form.categories.length - 1} aria-label="Move down" className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30"><ChevronDown className="w-4 h-4" /></button>
+                <button type="button" onClick={() => removeCategory(i)} disabled={count > 0}
+                  title={count > 0 ? 'Move or delete this category\'s products first' : 'Remove'} aria-label="Remove category"
+                  className="p-1 text-red-500 hover:bg-red-50 rounded disabled:opacity-30 disabled:hover:bg-transparent"><Trash2 className="w-4 h-4" /></button>
+              </div>
+            )
+          })}
+          <p className="text-xs text-gray-400">A category that still has products can't be removed. Edit those products first (Manage Products, pencil button), then remove it here.</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">

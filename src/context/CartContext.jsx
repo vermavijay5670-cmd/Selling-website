@@ -64,6 +64,24 @@ export function CartProvider({ children }) {
     })
   }
 
+  // Add many products at once (used by "Order again"). Quantities are capped at stock; unavailable ones are skipped.
+  const addItems = (lines) => {
+    const skipped = []
+    let next = [...cartRef.current]
+    for (const { product, quantity } of lines) {
+      if (!product || product.stock < 1) { skipped.push(product?.name || 'an item'); continue }
+      const idx = next.findIndex(i => i.id === product.id)
+      const have = idx >= 0 ? next[idx].quantity : 0
+      const qty = Math.min(have + quantity, product.stock)
+      if (qty < have + quantity) skipped.push(`${product.name} (only ${product.stock} available)`)
+      next = idx >= 0
+        ? next.map((i, n) => n === idx ? { ...i, quantity: qty } : i)
+        : [...next, { ...product, quantity: qty }]
+    }
+    setCart(next)
+    return skipped
+  }
+
   const removeFromCart = (id) => {
     setCart(prev => prev.filter(item => item.id !== id))
   }
@@ -90,6 +108,7 @@ export function CartProvider({ children }) {
     <CartContext.Provider value={{
       cart,
       addToCart,
+      addItems,
       removeFromCart,
       updateQuantity,
       clearCart,

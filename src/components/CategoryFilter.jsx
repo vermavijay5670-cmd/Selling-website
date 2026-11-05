@@ -1,6 +1,7 @@
-import { categories } from '../data/products'
+import { useSettings } from '../context/SettingsContext'
 
 export default function CategoryFilter({ selected, onSelect }) {
+  const { categories } = useSettings()
   return (
     <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
       {categories.map(cat => (

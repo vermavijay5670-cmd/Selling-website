@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import toast from 'react-hot-toast'
-import { ArrowLeft, ChevronDown, ChevronUp, ExternalLink, Search, Phone, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useSettings } from '../../context/SettingsContext'
+import { ArrowLeft, ChevronDown, ChevronUp, ExternalLink, Search, Phone, ChevronLeft, ChevronRight, MessageCircle, Printer } from 'lucide-react'
 
 const STATUS_OPTIONS = ['pending', 'confirmed', 'dispatched', 'delivered', 'cancelled']
 const STATUS_COLORS = {
@@ -14,9 +15,53 @@ const STATUS_COLORS = {
 }
 
 const PAGE_SIZE = 20
+
+const esc = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+const shortId = (order) => String(order.id).slice(0, 8).toUpperCase()
+
+// 10-digit Indian numbers get the 91 prefix; anything longer is assumed to include the country code
+const waNumber = (phone) => {
+  const d = String(phone || '').replace(/\D/g, '')
+  return d.length === 10 ? `91${d}` : d
+}
+
+const waMessage = (order, shopName) => {
+  const id = shortId(order)
+  const total = Number(order.total).toFixed(2)
+  const lines = {
+    pending: `Hello ${order.customer_name}, we have received your order #${id} (Rs ${total}). We will confirm it shortly. - ${shopName}`,
+    confirmed: `Hello ${order.customer_name}, your order #${id} (Rs ${total}) is confirmed and being packed. - ${shopName}`,
+    dispatched: `Hello ${order.customer_name}, your order #${id} (Rs ${total}) is out for delivery. Please keep the amount ready. - ${shopName}`,
+    delivered: `Hello ${order.customer_name}, your order #${id} has been delivered. Thank you for shopping with us! - ${shopName}`,
+    cancelled: `Hello ${order.customer_name}, your order #${id} has been cancelled. Please contact us if you have any questions. - ${shopName}`,
+  }
+  return lines[order.status] || lines.pending
+}
+
+// opens a clean packing slip in a new tab and prints it
+const printSlip = (order, shopName) => {
+  const w = window.open('', '_blank')
+  if (!w) { toast.error('Allow pop-ups to print the slip'); return }
+  const items = (Array.isArray(order.items) ? order.items : [])
+  const rows = items.map(i =>
+    `<tr><td>${esc(i.name)}</td><td>${esc(i.unit)}</td><td class="r">${esc(i.quantity)}</td><td class="r">${(Number(i.price) * Number(i.quantity)).toFixed(2)}</td></tr>`).join('')
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Order #${esc(shortId(order))}</title>
+<style>body{font-family:Arial,sans-serif;font-size:14px;max-width:420px;margin:16px auto;color:#111}
+h1{font-size:18px;margin:0}h2{font-size:14px;margin:14px 0 4px}table{width:100%;border-collapse:collapse}
+td,th{padding:4px 0;border-bottom:1px dashed #bbb;text-align:left}.r{text-align:right}.tot{font-weight:bold;font-size:16px}
+.muted{color:#555}</style></head><body>
+<h1>${esc(shopName)}</h1><div class="muted">Order #${esc(shortId(order))} &middot; ${esc(new Date(order.created_at).toLocaleString('en-IN'))}</div>
+<h2>Deliver to</h2><div><b>${esc(order.customer_name)}</b><br>${esc(order.phone)}<br>${esc(order.address)}<br>${esc(order.city)} - ${esc(order.pincode)}${order.landmark ? '<br>Near: ' + esc(order.landmark) : ''}</div>
+<h2>Items</h2><table><tr><th>Item</th><th>Unit</th><th class="r">Qty</th><th class="r">Rs</th></tr>${rows}
+<tr class="tot"><td colspan="3">Total (Cash on Delivery)</td><td class="r">${Number(order.total).toFixed(2)}</td></tr></table>
+${order.notes ? '<h2>Notes</h2><div>' + esc(order.notes) + '</div>' : ''}
+<script>window.onload=function(){window.print()}<\/script></body></html>`)
+  w.document.close()
+}
 const FILTERS = ['all', ...STATUS_OPTIONS]
 
 export default function AdminOrders() {
+  const { shopName } = useSettings()
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState(null)
@@ -189,6 +234,17 @@ export default function AdminOrders() {
                         <p className="text-xs text-gray-500 mt-1">Notes: {order.notes}</p>
                       )}
                     </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <a href={`https://wa.me/${waNumber(order.phone)}?text=${encodeURIComponent(waMessage(order, shopName))}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
+                      <MessageCircle className="w-3.5 h-3.5" /> Message on WhatsApp
+                    </a>
+                    <button onClick={() => printSlip(order, shopName)}
+                      className="inline-flex items-center gap-1.5 border border-gray-300 hover:bg-white text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
+                      <Printer className="w-3.5 h-3.5" /> Print Slip
+                    </button>
                   </div>
                   <div>
                     <p className="text-xs text-gray-400 font-medium uppercase mb-2">Items</p>

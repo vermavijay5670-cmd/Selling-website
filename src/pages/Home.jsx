@@ -1,27 +1,27 @@
 import { Link } from 'react-router-dom'
 import { ShoppingBag, Truck, Leaf, Shield, Star } from 'lucide-react'
-import { categories } from '../data/products'
 import { useProducts } from '../context/ProductsContext'
 import { useSettings } from '../context/SettingsContext'
 import ProductCard from '../components/ProductCard'
 
 const features = [
-  { icon: '🚀', label: 'Fast Delivery' },
-  { icon: '🌿', label: '100% Organic' },
+  { icon: '🚚', label: 'Home Delivery' },
+  { icon: '✅', label: 'Quality Products' },
   { icon: '💰', label: 'Best Prices' },
   { icon: '🔒', label: 'Secure Orders' },
 ]
 
 const whyUs = [
-  { icon: <Leaf className="w-7 h-7 text-green-600" />, title: 'Farm Direct', desc: 'Sourced directly from local farms, ensuring maximum freshness and nutrition in every product.' },
-  { icon: <Truck className="w-7 h-7 text-orange-500" />, title: 'Same-Day Delivery', desc: 'Order before 2 PM and get your fresh produce delivered to your doorstep the same day.' },
+  { icon: <Leaf className="w-7 h-7 text-green-600" />, title: 'Everything in One Place', desc: 'Staples, spices, fresh produce, snacks and household needs. Your whole monthly list from a single shop.' },
+  { icon: <Truck className="w-7 h-7 text-orange-500" />, title: 'Home Delivery', desc: 'Order online and get your groceries delivered to your doorstep. No need to step out.' },
   { icon: <Shield className="w-7 h-7 text-green-600" />, title: 'Quality Assured', desc: 'Every item is carefully inspected for quality before being packed and sent to you.' },
 ]
 
 
 export default function Home() {
   const { products } = useProducts()
-  const { shopName, settings } = useSettings()
+  const { shopName, settings, categories } = useSettings()
+  const [heroTop, ...heroRest] = settings.hero_title.split('\n')
   const testimonials = settings.testimonials || []
   const featuredProducts = products.slice(0, 8)
 
@@ -36,14 +36,14 @@ export default function Home() {
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 text-center">
           <div className="inline-flex items-center gap-2 bg-white/20 text-white text-sm px-4 py-1.5 rounded-full mb-6">
-            <span>🌱</span> Farm Fresh, Delivered Daily
+            {settings.hero_badge}
           </div>
           <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
-            Farm Fresh Vegetables<br />
-            <span className="text-green-200">&amp; Spices</span>
+            {heroTop}
+            {heroRest.length > 0 && <><br /><span className="text-green-200">{heroRest.join(' ')}</span></>}
           </h1>
           <p className="text-lg md:text-xl text-green-100 max-w-2xl mx-auto mb-8">
-            Order the freshest vegetables, leafy greens, fruits, and authentic spices directly from farms to your kitchen.
+            {settings.hero_subtitle}
           </p>
           <Link
             to="/products"
@@ -73,7 +73,7 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Shop by Category</h2>
         <p className="text-gray-500 mb-8">Find exactly what you need</p>
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-4">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
           {categories.slice(1).map(cat => (
             <Link
               key={cat.id}
@@ -93,7 +93,7 @@ export default function Home() {
           <div className="flex justify-between items-end mb-8">
             <div>
               <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Featured Products</h2>
-              <p className="text-gray-500">Today's top picks from our farm</p>
+              <p className="text-gray-500">Popular picks from our store</p>
             </div>
             <Link to="/products" className="text-sm text-green-600 hover:text-green-700 font-medium">
               View All →

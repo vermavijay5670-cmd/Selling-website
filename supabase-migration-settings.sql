@@ -29,3 +29,14 @@ ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS instagram TEXT NOT NULL DEFAU
 ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS facebook  TEXT NOT NULL DEFAULT '';
 ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS whatsapp  TEXT NOT NULL DEFAULT '';
 ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS testimonials JSONB NOT NULL DEFAULT '[]'::jsonb;
+
+-- Editable categories + home page banner text (general grocery store)
+ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS categories JSONB;                       -- NULL = built-in default list
+ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS hero_badge TEXT NOT NULL DEFAULT '';    -- '' = built-in default text
+ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS hero_title TEXT NOT NULL DEFAULT '';
+ALTER TABLE shop_settings ADD COLUMN IF NOT EXISTS hero_subtitle TEXT NOT NULL DEFAULT '';
+
+-- swap the old vegetables-only footer text for the grocery one (only if it was never customised)
+UPDATE shop_settings
+SET tagline = 'Your neighbourhood grocery store: everyday essentials, fresh produce and quality staples delivered to your doorstep.'
+WHERE tagline = 'Your trusted source for farm-fresh vegetables, herbs, and authentic spices delivered straight to your doorstep.';

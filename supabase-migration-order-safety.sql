@@ -10,6 +10,7 @@
 --  * Reduces product stock when an order is placed; gives it back if the order is
 --    cancelled (and takes it again if a cancelled order is re-opened).
 --  * Forces new orders to start as 'pending' with cash-on-delivery.
+--  * Limits each customer to 5 pending orders at a time.
 -- =============================================================
 
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS stock_reserved BOOLEAN NOT NULL DEFAULT false;
@@ -23,6 +24,12 @@ DECLARE
 BEGIN
   IF jsonb_typeof(NEW.items) IS DISTINCT FROM 'array' OR jsonb_array_length(NEW.items) = 0 THEN
     RAISE EXCEPTION 'Your cart is empty';
+  END IF;
+
+  -- abuse guard: a customer can have at most 5 orders waiting for the shop at once
+  IF NEW.user_id IS NOT NULL
+     AND (SELECT count(*) FROM orders WHERE user_id = NEW.user_id AND status = 'pending') >= 5 THEN
+    RAISE EXCEPTION 'You already have 5 orders waiting for the shop. Please wait for them to be confirmed, or cancel one.';
   END IF;
 
   -- one row per product id (duplicates merged), locked in id order to avoid deadlocks
