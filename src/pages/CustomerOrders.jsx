@@ -5,6 +5,7 @@ import { useSettings } from '../context/SettingsContext'
 import { supabase } from '../lib/supabase'
 import toast from 'react-hot-toast'
 import { useCart } from '../context/CartContext'
+import { canDownloadSlip, downloadOrderSlip } from '../lib/orderSlip'
 import { useProducts } from '../context/ProductsContext'
 import OrderTimeline, { STATUS_INFO } from '../components/OrderTimeline'
 import { Leaf, Package, LogOut, ShoppingBag, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
@@ -13,6 +14,7 @@ export default function CustomerOrders() {
   const { customer, signOut, customerLoading } = useCustomerAuth()
   const { shopName, settings } = useSettings()
   const [cancelling, setCancelling] = useState(null)
+  const [downloading, setDownloading] = useState(null)
   const { addItems, setIsCartOpen } = useCart()
   const { products } = useProducts()
   const navigate = useNavigate()
@@ -88,6 +90,18 @@ export default function CustomerOrders() {
     if (notes.length) toast(`Added to cart. Not fully available: ${notes.join(', ')}`, { duration: 6000 })
     else toast.success('Items added to your cart')
     setIsCartOpen(true)
+  }
+
+  // PDF slip, available once the shop has confirmed the order
+  const handleSlip = async (order) => {
+    setDownloading(order.id)
+    try {
+      await downloadOrderSlip(order, { shopName, address: settings.address, phone: settings.phone, email: settings.email })
+    } catch (err) {
+      toast.error(err.message || 'Could not create the slip')
+    } finally {
+      setDownloading(null)
+    }
   }
 
   const handleLogout = async () => {
@@ -278,11 +292,20 @@ export default function CustomerOrders() {
                         </div>
                       </div>
 
-                      <div className="px-5 pb-4">
+                      <div className="px-5 pb-4 flex flex-wrap items-center gap-2">
+                        {canDownloadSlip(order) && (
+                          <button onClick={() => handleSlip(order)} disabled={downloading === order.id}
+                            className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:opacity-60 px-4 py-2 rounded-xl transition-colors">
+                            {downloading === order.id ? 'Preparing...' : '⬇ Download Slip'}
+                          </button>
+                        )}
                         <button onClick={() => handleReorder(order)}
                           className="text-sm font-medium text-green-700 border border-green-200 hover:bg-green-50 px-4 py-2 rounded-xl transition-colors">
                           🔁 Order Again
                         </button>
+                        {order.status === 'pending' && (
+                          <span className="text-xs text-gray-400">Your slip can be downloaded once the shop confirms the order.</span>
+                        )}
                       </div>
                       {order.status === 'pending' && (
                         <div className="px-5 pb-5 flex flex-wrap items-center gap-3">
